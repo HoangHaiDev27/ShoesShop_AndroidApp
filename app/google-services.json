@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "143883791804",
+    "project_id": "basketballshoes-androidshop",
+    "storage_bucket": "basketballshoes-androidshop.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:143883791804:android:ef10286dccb06d58a08fb9",
+        "android_client_info": {
+          "package_name": "com.example.basketballshoesandroidshop"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDbdzBfIceHkxMi_EqbE0nBz0Anf7fJ-VQ"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
