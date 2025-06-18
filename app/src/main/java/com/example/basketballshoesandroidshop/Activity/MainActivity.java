@@ -14,11 +14,13 @@ import androidx.viewpager2.widget.CompositePageTransformer;
 import androidx.viewpager2.widget.MarginPageTransformer;
 
 import com.example.basketballshoesandroidshop.Adapter.CategoryAdapter;
+import com.example.basketballshoesandroidshop.Adapter.PopularAdapter;
 import com.example.basketballshoesandroidshop.Adapter.SliderAdapter;
 import com.example.basketballshoesandroidshop.Domain.BannerModel;
 import com.example.basketballshoesandroidshop.R;
 import com.example.basketballshoesandroidshop.ViewModel.MainViewModel;
 import com.example.basketballshoesandroidshop.databinding.ActivityMainBinding;
+import com.ismaeldivita.chipnavigation.ChipNavigationBar;
 
 import java.util.ArrayList;
 
@@ -35,6 +37,33 @@ public class MainActivity extends AppCompatActivity {
         viewModel = new MainViewModel();
         initCategory();
         initSlider();
+        initPopular();
+        bottomNavigation();
+    }
+
+    private void bottomNavigation() {
+        binding.bottomNavigation.setItemSelected(R.id.home,true);
+        binding.bottomNavigation.setOnItemSelectedListener(new ChipNavigationBar.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(int i) {
+
+            }
+        });
+    }
+
+    private void initPopular() {
+        binding.progressBarPopular.setVisibility(View.VISIBLE);
+        viewModel.loadPopular().observeForever(itemsModels -> {
+            if(!itemsModels.isEmpty()) {
+                binding.popularView.setLayoutManager(
+                        new LinearLayoutManager(MainActivity.this,LinearLayoutManager.HORIZONTAL,false)
+                );
+                binding.popularView.setAdapter(new PopularAdapter(itemsModels));
+                binding.popularView.setNestedScrollingEnabled(true);
+            }
+            binding.progressBarPopular.setVisibility(View.GONE);
+        });
+        viewModel.loadPopular();
     }
 
     private void initSlider() {
