@@ -20,6 +20,7 @@ import com.example.basketballshoesandroidshop.Domain.BannerModel;
 import com.example.basketballshoesandroidshop.R;
 import com.example.basketballshoesandroidshop.ViewModel.MainViewModel;
 import com.example.basketballshoesandroidshop.databinding.ActivityMainBinding;
+import com.ismaeldivita.chipnavigation.ChipNavigationBar;
 
 import java.util.ArrayList;
 
@@ -37,6 +38,17 @@ public class MainActivity extends AppCompatActivity {
         initCategory();
         initSlider();
         initPopular();
+        bottomNavigation();
+    }
+
+    private void bottomNavigation() {
+        binding.bottomNavigation.setItemSelected(R.id.home,true);
+        binding.bottomNavigation.setOnItemSelectedListener(new ChipNavigationBar.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(int i) {
+
+            }
+        });
     }
 
     private void initPopular() {
