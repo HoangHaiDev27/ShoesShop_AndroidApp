@@ -1,5 +1,6 @@
 package com.example.basketballshoesandroidshop.Activity;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
 
@@ -22,6 +23,8 @@ import com.example.basketballshoesandroidshop.ViewModel.MainViewModel;
 import com.example.basketballshoesandroidshop.databinding.ActivityMainBinding;
 import com.ismaeldivita.chipnavigation.ChipNavigationBar;
 
+import java.io.FileInputStream;
+import java.io.IOException;
 import java.util.ArrayList;
 
 public class MainActivity extends AppCompatActivity {
@@ -35,6 +38,7 @@ public class MainActivity extends AppCompatActivity {
         binding = ActivityMainBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
         viewModel = new MainViewModel();
+
         initCategory();
         initSlider();
         initPopular();
@@ -100,4 +104,5 @@ public class MainActivity extends AppCompatActivity {
             binding.progressBarCategory.setVisibility(View.GONE);
         });
     }
+
 }

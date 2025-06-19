@@ -3,6 +3,7 @@ package com.example.basketballshoesandroidshop.Activity;
 import android.content.Intent;
 import android.os.Bundle;
 
+
 import androidx.activity.EdgeToEdge;
 import androidx.appcompat.app.AppCompatActivity;
 
@@ -20,6 +21,7 @@ public class SplashActivity extends AppCompatActivity {
         setContentView(binding.getRoot());
 
         binding.startBtn.setOnClickListener(v ->
-                startActivity(new Intent(SplashActivity.this, MainActivity.class)));
+                startActivity(new Intent(SplashActivity.this, LoginActivity.class)));
+
     }
 }
