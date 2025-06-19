@@ -1,5 +1,6 @@
 package com.example.basketballshoesandroidshop.Activity;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
 
@@ -13,6 +14,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import androidx.viewpager2.widget.CompositePageTransformer;
 import androidx.viewpager2.widget.MarginPageTransformer;
 
+import com.example.basketballshoesandroidshop.Adapter.CartAdapter;
 import com.example.basketballshoesandroidshop.Adapter.CategoryAdapter;
 import com.example.basketballshoesandroidshop.Adapter.PopularAdapter;
 import com.example.basketballshoesandroidshop.Adapter.SliderAdapter;
@@ -47,6 +49,12 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onItemSelected(int i) {
 
+            }
+        });
+        binding.cartBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                startActivity(new Intent(MainActivity.this, CartAcitivity.class));
             }
         });
     }
