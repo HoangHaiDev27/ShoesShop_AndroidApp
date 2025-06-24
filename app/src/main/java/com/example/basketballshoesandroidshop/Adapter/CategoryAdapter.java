@@ -2,6 +2,7 @@ package com.example.basketballshoesandroidshop.Adapter;
 
 import android.annotation.SuppressLint;
 import android.content.Context;
+import android.content.Intent;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -9,6 +10,7 @@ import android.view.ViewGroup;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.example.basketballshoesandroidshop.Activity.CatalogActivity;
 import com.example.basketballshoesandroidshop.Domain.CategoryModel;
 import com.example.basketballshoesandroidshop.R;
 import com.example.basketballshoesandroidshop.databinding.ViewholderCategoryBinding;
@@ -43,6 +45,10 @@ public class CategoryAdapter extends RecyclerView.Adapter<CategoryAdapter.ViewHo
                 selectedPosition = position;
                 notifyItemChanged(lastSelectedPosition);
                 notifyItemChanged(selectedPosition);
+                Intent intent = new Intent(context, CatalogActivity.class);
+                intent.putExtra("categoryId",  items.get(position).getId());
+                intent.putExtra("categoryName", items.get(position).getTitle());
+                context.startActivity(intent);
             }
         });
         if(selectedPosition == position) {

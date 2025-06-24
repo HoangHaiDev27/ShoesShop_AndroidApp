@@ -15,6 +15,7 @@ public class ItemsModel implements Serializable {
     private int review;
     private double rating;
     private int numberInCart;
+    private int categoryId;
 
     public ItemsModel() {
     }
@@ -105,5 +106,13 @@ public class ItemsModel implements Serializable {
 
     public void setNumberInCart(int numberInCart) {
         this.numberInCart = numberInCart;
+    }
+
+    public int getCategoryId() {
+        return categoryId;
+    }
+
+    public void setCategoryId(int categoryId) {
+        this.categoryId = categoryId;
     }
 }
