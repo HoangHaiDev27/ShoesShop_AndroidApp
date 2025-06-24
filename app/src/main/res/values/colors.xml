@@ -8,5 +8,15 @@
     <color name="darkGrey">#616161</color>
     <color name="orange">#DC6F31</color>
     <color name="red">#FF0000</color>
+    <color name='transparent'>#00ffffff</color>
+
+    <!--  Giratina  -->
+    <color name="giratina_700">#8391A1</color>
+    <color name="giratina_600">#494949</color>
+    <color name="giratina_500">#9E9E9E</color>
+    <color name="giratina_400">#BDBDBD</color>
+    <color name="giratina_300">#E0E0E0</color>
+    <color name="giratina_200">#E0E0E0</color>
+    <color name="giratina_100">#F5F5F5</color>
 
 </resources>
