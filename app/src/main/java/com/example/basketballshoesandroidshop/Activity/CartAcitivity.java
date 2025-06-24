@@ -1,7 +1,12 @@
 package com.example.basketballshoesandroidshop.Activity;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
+import android.widget.Button;
+import android.widget.EditText;
+import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.activity.EdgeToEdge;
 import androidx.appcompat.app.AppCompatActivity;
@@ -21,6 +26,8 @@ public class CartAcitivity extends AppCompatActivity {
     private ActivityCartAcitivityBinding biding;
     private double tax;
     private ManagmentCart managementCart;
+    Button  btnCheckout;
+    TextView total;
 
 
 
@@ -35,6 +42,23 @@ public class CartAcitivity extends AppCompatActivity {
         CalculatorCart();
         SetVariable();
         initCartList();
+        btnCheckout = findViewById(R.id.checkoutBtn);
+        total = findViewById(R.id.totalTxt);
+        btnCheckout.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if(total ==  null ||total.getText().toString().isEmpty()){
+                    Toast.makeText(CartAcitivity.this,"Không có sản phẩm nào trong giỏ",Toast.LENGTH_SHORT).show();
+                    return;
+                }
+
+                String totalString = total.getText().toString().replaceAll("[^\\d.]", "");
+                double totalDouble = Double.parseDouble(totalString);
+                Intent intent = new Intent(CartAcitivity.this, OrderPayment.class);
+                intent.putExtra("total",totalDouble);
+                startActivity(intent);
+            }
+        });
 
     }
 
@@ -46,7 +70,7 @@ public class CartAcitivity extends AppCompatActivity {
             biding.emptyTxt.setVisibility(View.GONE);
             biding.scrollView2.setVisibility(View.VISIBLE);
         }
-        biding.cartView.setLayoutManager(new LinearLayoutManager(this,LinearLayoutManager.HORIZONTAL,false));
+        biding.cartView.setLayoutManager(new LinearLayoutManager(this,LinearLayoutManager.VERTICAL,false));
         biding.cartView.setAdapter(
                 new CartAdapter(
                         managementCart.getListCart(),
@@ -64,12 +88,9 @@ public class CartAcitivity extends AppCompatActivity {
     private void CalculatorCart() {
         double percentTax = 0.02;
         double delivey = 10;
-        tax = Math.round((managementCart.getTotalFee() * percentTax * 100.0))/100.0;
-
-        double total = Math.round((managementCart.getTotalFee() + tax + delivey)*100.0)/100.0;
+        double total = Math.round((managementCart.getTotalFee() + delivey)*100.0)/100.0;
         double itemTotal = Math.round((managementCart.getTotalFee()*100.0))/100;
         biding.totalFeeTxt.setText("$" +itemTotal);
-        biding.taxTxt.setText("$"+delivey);
         biding.deliveryTxt.setText("$"+delivey);
         biding.totalTxt.setText("$"+total);
     }

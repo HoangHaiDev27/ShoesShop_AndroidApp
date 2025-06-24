@@ -20,7 +20,17 @@ dependencyResolutionManagement {
         maven{url = uri("https://jitpack.io")}
     }
 }
+dependencyResolutionManagement {
+    repositories {
+        google()
+        mavenCentral()
+        flatDir {
+            dirs("app/library")
+        }
+    }
+}
+
 
 rootProject.name = "BasketballShoes.AndroidShop"
 include(":app")
- 
+include(":app:libs")
