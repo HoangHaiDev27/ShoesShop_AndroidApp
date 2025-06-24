@@ -63,6 +63,7 @@ dependencies {
     implementation("com.github.bumptech.glide:glide:4.12.0")
     implementation("com.google.code.gson:gson:2.9.1")
     implementation("com.github.ismaeldivita:chip-navigation-bar:1.4.0")
+    implementation("com.squareup.picasso:picasso:2.5.2")
     implementation("com.google.android.material:material:1.9.0")
     //zalo pay
     implementation("com.squareup.okhttp3:okhttp:4.6.0")

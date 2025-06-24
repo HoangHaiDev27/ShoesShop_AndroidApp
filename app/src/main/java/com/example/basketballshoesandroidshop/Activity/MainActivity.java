@@ -3,6 +3,7 @@ package com.example.basketballshoesandroidshop.Activity;
 import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
+import android.widget.EditText;
 
 import androidx.activity.EdgeToEdge;
 import androidx.appcompat.app.AppCompatActivity;
@@ -31,6 +32,7 @@ import java.util.ArrayList;
 public class MainActivity extends AppCompatActivity {
     private ActivityMainBinding binding;
     private MainViewModel viewModel;
+    private EditText edtSearch;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -44,6 +46,17 @@ public class MainActivity extends AppCompatActivity {
         initSlider();
         initPopular();
         bottomNavigation();
+        navigateToCatalog();
+    }
+
+    private void navigateToCatalog() {
+        edtSearch = findViewById(R.id.editTextText); // ID của ô tìm kiếm trong layout
+
+        // Lắng nghe sự kiện nhấn vào ô tìm kiếm
+        edtSearch.setOnClickListener(v -> {
+            Intent intent = new Intent(MainActivity.this, CatalogActivity.class);
+            startActivity(intent); // Mở Activity tìm kiếm
+        });
     }
 
     private void bottomNavigation() {
