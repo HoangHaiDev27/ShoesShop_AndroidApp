@@ -44,7 +44,7 @@ public class OrderPayment extends AppCompatActivity {
 
         // Nhận giá trị từ CartActivity
         Intent intent = getIntent();
-        double total = intent.getDoubleExtra("total", 0.0);
+        double total = intent.getDoubleExtra("total", 0.0)*25000;
         String totalString = String.format("%.0f", total);
         txtTotal.setText("$" + totalString);
 
