@@ -13,6 +13,7 @@ import androidx.lifecycle.ViewModelProvider;
 
 import com.example.basketballshoesandroidshop.Adapter.CatalogAdapter;
 import com.example.basketballshoesandroidshop.Domain.ItemsModel;
+import com.example.basketballshoesandroidshop.Utils.Sort;
 import com.example.basketballshoesandroidshop.ViewModel.CatalogViewModel;
 import com.example.basketballshoesandroidshop.databinding.ActivityCatalogBinding;
 
@@ -26,9 +27,9 @@ public class CatalogActivity extends AppCompatActivity {
     private ActivityCatalogBinding binding;
     private int categoryId;
     private String categoryName;
-
     private CatalogViewModel viewModel;
     private EditText edtSearch;
+    private Sort sort;
     private static final String TAG = "CatalogActivity";
 
     @Override
@@ -43,6 +44,7 @@ public class CatalogActivity extends AppCompatActivity {
 
 
         init();
+        sort = new Sort(categoryId, viewModel, edtSearch.getText().toString().trim());
         loadData();
         setUpEditText();
     }
@@ -57,6 +59,7 @@ public class CatalogActivity extends AppCompatActivity {
             @Override
             public void onTextChanged(CharSequence s, int start, int before, int count) {
                 // Filter the products based on the search query
+                sort.setSearchContent(s.toString());
                 filterProducts(s.toString());
             }
 
@@ -110,5 +113,8 @@ public class CatalogActivity extends AppCompatActivity {
             finish();
         });
 
+        binding.btnSort.setOnClickListener(v -> {
+            sort.show(getSupportFragmentManager(), "Sort");
+        });
     }
 }
