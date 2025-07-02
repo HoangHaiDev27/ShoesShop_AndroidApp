@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    tools:context=".Utils.Sort"
+    android:orientation="vertical"
+    android:background="@drawable/dialog_bg">
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="56dp"
+        android:text="Sort by"
+        android:textSize="32sp"
+        android:paddingBottom="16dp"/>
+
+    <ListView
+        android:id="@+id/sort_lv"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:divider="@null"
+        android:scrollbars="none"
+        tools:listitem="@layout/item_option" />
+
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/sort_bt_cancel"
+        android:layout_width="match_parent"
+        android:layout_height="64dp"
+        android:layout_marginVertical="16dp"
+        android:text="Cancel"
+        android:textColor="@color/black"
+        android:backgroundTint="@color/giratina_100"
+        app:cornerRadius="8dp"/>
+
+</LinearLayout>
