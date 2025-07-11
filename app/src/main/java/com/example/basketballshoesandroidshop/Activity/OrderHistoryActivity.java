@@ -1,6 +1,7 @@
 package com.example.basketballshoesandroidshop.Activity;
 
 import android.os.Bundle;
+import android.util.Log;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
@@ -34,6 +35,16 @@ public class OrderHistoryActivity extends AppCompatActivity {
         new TabLayoutMediator(tabLayout, viewPager,
                 (tab, position) -> tab.setText(titles[position])
         ).attach();
+        if (getIntent().hasExtra("SELECTED_TAB_INDEX")) {
+            int selectedTabIndex = getIntent().getIntExtra("SELECTED_TAB_INDEX", 0);
+
+            // In ra Logcat để kiểm tra
+            Log.d("TabDebug", "Đã nhận được chỉ số tab: " + selectedTabIndex);
+
+            viewPager.setCurrentItem(selectedTabIndex, false);
+        } else {
+            Log.d("TabDebug", "Không nhận được chỉ số tab nào từ Intent.");
+        }
     }
 
     @Override

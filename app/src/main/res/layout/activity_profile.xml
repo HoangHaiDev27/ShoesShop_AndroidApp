@@ -44,6 +44,7 @@
                 android:orientation="vertical">
 
                 <TextView
+                    android:id="@+id/tvUsername"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="binvro6969"
@@ -101,10 +102,26 @@
                     android:layout_marginTop="16dp"
                     android:orientation="horizontal">
 
-                    <TextView style="@style/OrderStatusIcon" android:text="Chờ xác nhận" app:drawableTopCompat="@drawable/ic_pending_confirmation" />
-                    <TextView style="@style/OrderStatusIcon" android:text="Chờ lấy hàng" app:drawableTopCompat="@drawable/ic_waiting_pickup" />
-                    <TextView style="@style/OrderStatusIcon" android:text="Chờ giao hàng" app:drawableTopCompat="@drawable/ic_waiting_delivery" />
-                    <TextView style="@style/OrderStatusIcon" android:text="Đánh giá" app:drawableTopCompat="@drawable/ic_rate" />
+                    <TextView
+                        android:id="@+id/tvPending"
+                        style="@style/OrderStatusIcon"
+                        android:text="Chờ xác nhận"
+                        app:drawableTopCompat="@drawable/ic_pending_confirmation" />
+                    <TextView
+                        android:id="@+id/tvToPickup"
+                        style="@style/OrderStatusIcon"
+                        android:text="Chờ lấy hàng"
+                        app:drawableTopCompat="@drawable/ic_waiting_pickup" />
+                    <TextView
+                        android:id="@+id/tvToShip"
+                        style="@style/OrderStatusIcon"
+                        android:text="Chờ giao hàng"
+                        app:drawableTopCompat="@drawable/ic_waiting_delivery" />
+                    <TextView
+                        android:id="@+id/tvToRate"
+                        style="@style/OrderStatusIcon"
+                        android:text="Đánh giá"
+                        app:drawableTopCompat="@drawable/ic_rate" />
                 </LinearLayout>
 
             </LinearLayout>
