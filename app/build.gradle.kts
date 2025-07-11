@@ -51,6 +51,7 @@ dependencies {
         "include" to listOf("*.aar", "*.jar"),
         "exclude" to listOf("")
     )))
+    implementation(libs.firebase.firestore)
 //    implementation(fileTree(mapOf(
 //        "dir" to "/Users/hoanghai/Desktop/ZaloPayLib",
 //        "include" to listOf("*.aar", "*.jar"),
@@ -68,6 +69,9 @@ dependencies {
     //zalo pay
     implementation("com.squareup.okhttp3:okhttp:4.6.0")
     implementation("commons-codec:commons-codec:1.14")
+    implementation ("com.android.volley:volley:1.2.1")
+    implementation ("com.google.android.gms:play-services-maps:18.2.0")
+    implementation ("com.google.maps.android:android-maps-utils:2.3.0")
 
 
 }

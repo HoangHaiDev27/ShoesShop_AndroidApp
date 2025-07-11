@@ -63,6 +63,21 @@
        <activity
                 android:name=".Activity.CatalogActivity"
                 android:exported="true"/>
+        <activity
+            android:name=".Activity.OrderHistoryActivity"
+            android:exported="false" />
+        <activity
+            android:name=".Activity.ProfileActivity"
+            android:exported="false" />
+        <activity
+            android:name=".Activity.OrderDetailActivity"
+            android:exported="false" />
+        <activity
+            android:name=".Activity.TrackingActivity"
+            android:exported="false" />
+        <meta-data
+            android:name="com.google.android.geo.API_KEY"
+            android:value="@string/map_api" />
     </application>
 
 </manifest>

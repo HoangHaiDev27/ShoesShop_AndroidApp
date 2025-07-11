@@ -60,13 +60,23 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void bottomNavigation() {
-        binding.bottomNavigation.setItemSelected(R.id.home,true);
+        binding.bottomNavigation.setItemSelected(R.id.home, true); // đặt mặc định
+
         binding.bottomNavigation.setOnItemSelectedListener(new ChipNavigationBar.OnItemSelectedListener() {
             @Override
-            public void onItemSelected(int i) {
-
+            public void onItemSelected(int id) {
+                if (id == R.id.home) {
+                    // Đã ở MainActivity, không cần chuyển
+                } else if (id == R.id.favorites) {
+                   // startActivity(new Intent(MainActivity.this, FavoritesActivity.class));
+                } else if (id == R.id.cart) {
+                    startActivity(new Intent(MainActivity.this, CartAcitivity.class));
+                } else if (id == R.id.profile) {
+                    startActivity(new Intent(MainActivity.this, ProfileActivity.class));
+                }
             }
         });
+
         binding.cartBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -74,6 +84,8 @@ public class MainActivity extends AppCompatActivity {
             }
         });
     }
+
+
 
     private void initPopular() {
         binding.progressBarPopular.setVisibility(View.VISIBLE);
