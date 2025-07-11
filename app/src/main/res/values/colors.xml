@@ -18,5 +18,13 @@
     <color name="giratina_300">#E0E0E0</color>
     <color name="giratina_200">#E0E0E0</color>
     <color name="giratina_100">#F5F5F5</color>
+    <color name="status_green_bg">#E6F4EA</color>
+    <color name="status_green_text">#00875A</color>
+    <color name="light_gray_background">#F5F5F5</color>
+    <color name="primary_orange">#FF6600</color>
+    <color name="status_blue_text">#006FC4</color>
+    <color name="status_red_text">#D0021B</color>
+    <color name="status_blue_bg">#E5F1FC</color>
+    <color name="status_red_bg">#FDE8E9</color>
 
 </resources>
