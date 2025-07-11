@@ -26,6 +26,15 @@ public class CategoryAdapter extends RecyclerView.Adapter<CategoryAdapter.ViewHo
     public CategoryAdapter(ArrayList<CategoryModel> items) {
         this.items = items;
     }
+    
+    // Method để reset selection về trạng thái ban đầu
+    public void resetSelection() {
+        lastSelectedPosition = selectedPosition;
+        selectedPosition = -1;
+        if (lastSelectedPosition != -1) {
+            notifyItemChanged(lastSelectedPosition);
+        }
+    }
 
     @NonNull
     @Override

@@ -34,6 +34,19 @@
         app:layout_constraintStart_toStartOf="@+id/pic"
         app:layout_constraintTop_toTopOf="@+id/pic" />
 
+    <ImageButton
+        android:id="@+id/btnWishlist"
+        android:layout_width="32dp"
+        android:layout_height="32dp"
+        android:layout_margin="8dp"
+        android:background="@drawable/white_full_co_bg"
+        android:padding="6dp"
+        android:scaleType="fitCenter"
+        app:layout_constraintEnd_toEndOf="@+id/pic"
+        app:layout_constraintTop_toTopOf="@+id/pic"
+        app:srcCompat="@drawable/heart"
+        app:tint="@color/darkGrey" />
+
     <TextView
         android:id="@+id/titleTxt"
         android:layout_width="0dp"

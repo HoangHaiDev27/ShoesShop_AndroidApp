@@ -40,9 +40,13 @@
 
         <ImageButton
             android:id="@+id/iv_love_like"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:background="@drawable/heart"/>
+            android:layout_width="32dp"
+            android:layout_height="32dp"
+            android:background="@drawable/white_full_co_bg"
+            android:padding="6dp"
+            android:scaleType="fitCenter"
+            app:srcCompat="@drawable/heart"
+            app:tint="@color/darkGrey" />
     </LinearLayout>
     <TextView
         android:layout_height="wrap_content"
