@@ -9,12 +9,16 @@ import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.fragment.app.FragmentManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.bumptech.glide.Glide;
 import com.example.basketballshoesandroidshop.Activity.OrderDetailActivity;
+import com.example.basketballshoesandroidshop.Activity.RatingDialogFragment;
 import com.example.basketballshoesandroidshop.Domain.OrderItemModel;
 import com.example.basketballshoesandroidshop.Domain.OrderModel;
 import com.example.basketballshoesandroidshop.R;
@@ -49,11 +53,17 @@ public class OrderAdapter extends RecyclerView.Adapter<OrderAdapter.OrderViewHol
         holder.textViewStoreName.setText("Store");
 
 
-        if ("Đã giao".equals(order.getOrderStatus())) {
+     /*   if ("Đã giao".equals(order.getOrderStatus())) {
             holder.textViewOrderStatus.setText("Hoàn thành");
             holder.buttonRate.setVisibility(View.VISIBLE);
         } else {
             holder.textViewOrderStatus.setText(order.getOrderStatus());
+            holder.buttonRate.setVisibility(View.GONE);
+        }*/
+
+        if ("Đã giao".equalsIgnoreCase(order.getOrderStatus()) || "Hoàn thành".equalsIgnoreCase(order.getOrderStatus())) {
+            holder.buttonRate.setVisibility(View.VISIBLE);
+        } else {
             holder.buttonRate.setVisibility(View.GONE);
         }
 
@@ -101,6 +111,23 @@ public class OrderAdapter extends RecyclerView.Adapter<OrderAdapter.OrderViewHol
 
             // Khởi chạy Activity mới
             context.startActivity(intent);
+        });
+
+        holder.buttonRate.setOnClickListener(v -> {
+            // Giả sử chúng ta đánh giá sản phẩm đầu tiên trong đơn hàng
+            if (order.getItems() != null && !order.getItems().isEmpty()) {
+                String itemIdToRate = order.getItems().get(0).getItemId();
+                String orderId = order.getOrderId();
+
+
+                FragmentManager fragmentManager = ((AppCompatActivity) context).getSupportFragmentManager();
+
+
+                RatingDialogFragment dialog = RatingDialogFragment.newInstance(orderId, itemIdToRate);
+                dialog.show(fragmentManager, "RatingDialog");
+            } else {
+                Toast.makeText(context, "Không có sản phẩm để đánh giá.", Toast.LENGTH_SHORT).show();
+            }
         });
     }
 

@@ -1,6 +1,7 @@
 package com.example.basketballshoesandroidshop.Activity;
 
 import android.content.Intent;
+import android.net.Uri;
 import android.os.Bundle;
 import android.util.Log;
 import android.widget.Button;
@@ -14,6 +15,7 @@ import androidx.core.content.ContextCompat;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import android.widget.LinearLayout;
+import android.widget.Toast;
 
 import com.bumptech.glide.Glide;
 import com.example.basketballshoesandroidshop.Adapter.OrderDetailAdapter;
@@ -70,6 +72,38 @@ public class OrderDetailActivity extends AppCompatActivity {
             fetchOrderDetails(userId, orderId);
             // Bước 2: Lấy danh sách sản phẩm cho đơn hàng đó
             fetchItemsForOrder(orderId);
+        }
+
+        setupActionListeners();
+    }
+
+    private void setupActionListeners() {
+        TextView tvContactShop = findViewById(R.id.tvContactShop);
+
+        tvContactShop.setOnClickListener(v -> {
+            // Gọi phương thức để gửi email
+            sendEmailToShop();
+        });
+    }
+
+    private void sendEmailToShop() {
+        // Lấy thông tin cần thiết. Tốt nhất là lấy từ dữ liệu đơn hàng.
+        String shopEmail = "binvro6969@gmail.com"; // Email của cửa hàng
+        String subject = "Hỗ trợ về đơn hàng #" + orderId; // orderId đã được lấy từ intent
+        String body = "Xin chào, tôi cần hỗ trợ về đơn hàng có mã " + orderId + ". Vấn đề của tôi là: ";
+
+        // Tạo một Intent để gửi email
+        Intent intent = new Intent(Intent.ACTION_SENDTO);
+        intent.setData(Uri.parse("mailto:")); // Chỉ các ứng dụng email mới nên xử lý intent này
+        intent.putExtra(Intent.EXTRA_EMAIL, new String[]{shopEmail}); // Mảng các địa chỉ email người nhận
+        intent.putExtra(Intent.EXTRA_SUBJECT, subject); // Tiêu đề email
+        intent.putExtra(Intent.EXTRA_TEXT, body); // Nội dung email
+
+
+        if (intent.resolveActivity(getPackageManager()) != null) {
+            startActivity(intent);
+        } else {
+            Toast.makeText(this, "Không tìm thấy ứng dụng email.", Toast.LENGTH_SHORT).show();
         }
     }
 

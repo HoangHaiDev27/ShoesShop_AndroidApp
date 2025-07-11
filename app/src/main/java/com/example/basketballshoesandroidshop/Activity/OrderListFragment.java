@@ -16,6 +16,7 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.basketballshoesandroidshop.Adapter.OrderAdapter;
+import com.example.basketballshoesandroidshop.Domain.OrderItemModel;
 import com.example.basketballshoesandroidshop.Domain.OrderModel;
 import com.example.basketballshoesandroidshop.R;
 import com.google.firebase.FirebaseApp;
@@ -30,6 +31,7 @@ import com.google.firebase.firestore.QueryDocumentSnapshot;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicInteger;
 
 public class OrderListFragment extends Fragment {
 
@@ -90,7 +92,6 @@ public class OrderListFragment extends Fragment {
         fetchOrders();
     }
 
-    // Viết lại hoàn toàn phương thức fetchOrders
     private void fetchOrders() {
         if (orderStatus == null) {
             Log.e("FetchOrders", "orderStatus bị null! Không thể thực hiện truy vấn.");
@@ -100,43 +101,77 @@ public class OrderListFragment extends Fragment {
         progressBar.setVisibility(View.VISIBLE);
         textViewNoOrders.setVisibility(View.GONE);
 
-        String currentUserId = "user_001"; // Giả sử userId
-
+        String currentUserId = "user_001";
 
         Query query = databaseReference.child("Orders").child(currentUserId)
                 .orderByChild("orderStatus")
                 .equalTo(orderStatus);
 
-        // Sử dụng addListenerForSingleValueEvent để lấy dữ liệu một lần
         query.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-                progressBar.setVisibility(View.GONE);
-                orderList.clear();
-
-                // Duyệt qua kết quả
-                for (DataSnapshot snapshot : dataSnapshot.getChildren()) {
-                    // Chuyển đổi dữ liệu thành OrderModel
-                    OrderModel order = snapshot.getValue(OrderModel.class);
-                    if (order != null) {
-                        // Lấy key của đơn hàng (ví dụ: "order_001")
-                        order.setOrderId(snapshot.getKey());
-                        orderList.add(order);
-                    }
+                if (!dataSnapshot.exists()) {
+                    // Nếu không có đơn hàng nào, hiển thị thông báo và dừng lại
+                    progressBar.setVisibility(View.GONE);
+                    textViewNoOrders.setVisibility(View.VISIBLE);
+                    orderList.clear();
+                    adapter.notifyDataSetChanged();
+                    return;
                 }
 
-                adapter.notifyDataSetChanged();
+                final long totalOrders = dataSnapshot.getChildrenCount();
+                final AtomicInteger ordersProcessed = new AtomicInteger(0);
+                orderList.clear();
 
-                if (orderList.isEmpty()) {
-                    textViewNoOrders.setVisibility(View.VISIBLE);
+                // Vòng lặp cho mỗi đơn hàng trong kết quả
+                for (DataSnapshot orderSnapshot : dataSnapshot.getChildren()) {
+                    // 1. Lấy thông tin cơ bản của đơn hàng
+                    OrderModel order = orderSnapshot.getValue(OrderModel.class);
+                    String orderId = orderSnapshot.getKey();
+                    if (order != null) {
+                        order.setOrderId(orderId);
+
+                        // 2. Với mỗi đơn hàng, thực hiện truy vấn thứ hai để lấy items
+                        DatabaseReference itemsRef = databaseReference.child("OrderItem").child(orderId);
+                        itemsRef.addListenerForSingleValueEvent(new ValueEventListener() {
+                            @Override
+                            public void onDataChange(@NonNull DataSnapshot itemsSnapshot) {
+                                List<OrderItemModel> items = new ArrayList<>();
+                                for (DataSnapshot itemData : itemsSnapshot.getChildren()) {
+                                    items.add(itemData.getValue(OrderItemModel.class));
+                                }
+                                // 3. Gán danh sách items vào đối tượng order
+                                order.setItems(items);
+                                orderList.add(order);
+
+                                // 4. Kiểm tra xem đã xử lý xong tất cả các đơn hàng chưa
+                                if (ordersProcessed.incrementAndGet() == totalOrders) {
+                                    // Chỉ cập nhật adapter và UI sau khi đã lấy đủ dữ liệu cho TẤT CẢ đơn hàng
+                                    progressBar.setVisibility(View.GONE);
+                                    adapter.notifyDataSetChanged();
+                                    if(orderList.isEmpty()){
+                                        textViewNoOrders.setVisibility(View.VISIBLE);
+                                    }
+                                }
+                            }
+
+                            @Override
+                            public void onCancelled(@NonNull DatabaseError databaseError) {
+                                // Xử lý lỗi khi lấy item, và vẫn kiểm tra để hoàn thành
+                                if (ordersProcessed.incrementAndGet() == totalOrders) {
+                                    progressBar.setVisibility(View.GONE);
+                                    adapter.notifyDataSetChanged();
+                                }
+                            }
+                        });
+                    }
                 }
             }
 
             @Override
             public void onCancelled(@NonNull DatabaseError databaseError) {
                 progressBar.setVisibility(View.GONE);
-                Toast.makeText(getContext(), "Lỗi khi tải đơn hàng: " + databaseError.getMessage(), Toast.LENGTH_SHORT).show();
-                Log.e("FetchOrders", "Lỗi Realtime Database: ", databaseError.toException());
+                Toast.makeText(getContext(), "Lỗi tải danh sách đơn hàng.", Toast.LENGTH_SHORT).show();
             }
         });
     }

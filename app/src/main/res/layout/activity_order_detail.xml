@@ -192,6 +192,7 @@
                     app:drawableEndCompat="@drawable/ic_chevron_right"
                     android:drawablePadding="12dp"/>
                 <TextView
+                    android:id="@+id/tvContactShop"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:text="Liên hệ Shop"
