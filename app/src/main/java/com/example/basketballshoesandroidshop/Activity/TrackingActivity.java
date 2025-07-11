@@ -41,35 +41,25 @@ public class TrackingActivity extends FragmentActivity implements OnMapReadyCall
     private GoogleMap mMap;
     private String userId, orderId;
     private DatabaseReference databaseReference;
-    private RequestQueue requestQueue; // Hàng đợi để thực hiện các yêu cầu mạng
+    // ... các view khác
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_tracking);
 
-        // Khởi tạo hàng đợi Volley
-        requestQueue = Volley.newRequestQueue(this);
-
         userId = getIntent().getStringExtra("USER_ID");
         orderId = getIntent().getStringExtra("ORDER_ID");
 
-        // Bắt sự kiện cho nút quay về
-        ImageButton btnBack = findViewById(R.id.btnBack);
-        btnBack.setOnClickListener(v -> onBackPressed());
-
-        // Lấy Map Fragment
         SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
                 .findFragmentById(R.id.map);
-        if (mapFragment != null) {
-            mapFragment.getMapAsync(this);
-        }
+        mapFragment.getMapAsync(this);
 
         databaseReference = FirebaseDatabase.getInstance().getReference();
     }
 
     @Override
-    public void onMapReady(@NonNull GoogleMap googleMap) {
+    public void onMapReady(GoogleMap googleMap) {
         mMap = googleMap;
         if (userId != null && orderId != null) {
             fetchTrackingData();
@@ -81,99 +71,52 @@ public class TrackingActivity extends FragmentActivity implements OnMapReadyCall
         orderRef.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
+                // Lấy danh sách tọa độ từ Firebase
+                List<LatLng> routePoints = new ArrayList<>();
                 DataSnapshot coordinatesSnapshot = snapshot.child("routeCoordinates");
-
-                // Lấy các sự kiện vận chuyển và hiển thị trên bottom sheet (code tương tự)
-                // ...
-
-                if (coordinatesSnapshot.getChildrenCount() >= 2) {
-                    try {
-                        // Lấy điểm đầu và cuối
-                        DataSnapshot startNode = coordinatesSnapshot.child("0");
-                        DataSnapshot endNode = coordinatesSnapshot.child(String.valueOf(coordinatesSnapshot.getChildrenCount() - 1));
-
-                        LatLng origin = new LatLng(startNode.child("lat").getValue(Double.class), startNode.child("lng").getValue(Double.class));
-                        LatLng destination = new LatLng(endNode.child("lat").getValue(Double.class), endNode.child("lng").getValue(Double.class));
-
-                        // Gọi hàm mới để lấy lộ trình và vẽ
-                        getDirectionsAndDrawRoute(origin, destination);
-                    } catch (Exception e) {
-                        Toast.makeText(TrackingActivity.this, "Lỗi định dạng tọa độ.", Toast.LENGTH_SHORT).show();
-                        Log.e("TrackingActivity", "Lỗi khi đọc tọa độ", e);
+                for (DataSnapshot coordSnapshot : coordinatesSnapshot.getChildren()) {
+                    Double lat = coordSnapshot.child("lat").getValue(Double.class);
+                    Double lng = coordSnapshot.child("lng").getValue(Double.class);
+                    if (lat != null && lng != null) {
+                        routePoints.add(new LatLng(lat, lng));
                     }
-                } else {
-                    Toast.makeText(TrackingActivity.this, "Không đủ dữ liệu tọa độ để vẽ.", Toast.LENGTH_SHORT).show();
                 }
-            }
 
+                // Lấy danh sách các sự kiện vận chuyển
+                // ... code để lấy trackingEvents và đưa vào RecyclerView ...
+
+                // Vẽ lên bản đồ
+                drawRouteOnMap(routePoints);
+            }
             @Override
-            public void onCancelled(@NonNull DatabaseError error) {
-                Toast.makeText(TrackingActivity.this, "Lỗi tải dữ liệu đơn hàng.", Toast.LENGTH_SHORT).show();
+            public void onCancelled(@NonNull DatabaseError databaseError) {
+                // ✅ Đây là phương thức bị thiếu
+                // Viết code xử lý khi có lỗi xảy ra (ví dụ: mất quyền truy cập)
+                // Bạn nên in lỗi ra để dễ dàng gỡ rối
+                Log.e("FirebaseError", "Lỗi khi đọc dữ liệu.", databaseError.toException());
             }
         });
     }
 
-    private void getDirectionsAndDrawRoute(LatLng origin, LatLng destination) {
+    private void drawRouteOnMap(List<LatLng> routePoints) {
+        if (routePoints.isEmpty() || mMap == null) return;
 
-        String apiKey = getString(R.string.map_api);
-        String url = "https://maps.googleapis.com/maps/api/directions/json" +
-                "?origin=" + origin.latitude + "," + origin.longitude +
-                "&destination=" + destination.latitude + "," + destination.longitude +
-                "&key=" + apiKey;
-
-        // Tạo một yêu cầu chuỗi bằng Volley
-        StringRequest stringRequest = new StringRequest(Request.Method.GET, url,
-                response -> {
-                    // Xử lý khi có kết quả trả về thành công
-                    try {
-                        JSONObject jsonResponse = new JSONObject(response);
-                        JSONArray routes = jsonResponse.getJSONArray("routes");
-
-                        if (routes.length() > 0) {
-                            JSONObject route = routes.getJSONObject(0);
-                            JSONObject overviewPolyline = route.getJSONObject("overview_polyline");
-                            String encodedPolyline = overviewPolyline.getString("points");
-
-                            // Dùng thư viện Maps Utils để giải mã chuỗi polyline
-                            List<LatLng> decodedPath = PolyUtil.decode(encodedPolyline);
-
-                            // Vẽ đường đi lên bản đồ
-                            drawPolylineOnMap(decodedPath, origin, destination);
-                        } else {
-                            Toast.makeText(this, "Không tìm thấy lộ trình.", Toast.LENGTH_SHORT).show();
-                        }
-                    } catch (JSONException e) {
-                        e.printStackTrace();
-                        Toast.makeText(this, "Lỗi phân tích dữ liệu lộ trình.", Toast.LENGTH_SHORT).show();
-                    }
-                },
-                error -> {
-                    // Xử lý khi có lỗi mạng
-                    Log.e("TrackingActivity", "Lỗi Volley: " + error.toString());
-                    Toast.makeText(this, "Lỗi khi gọi API Directions.", Toast.LENGTH_SHORT).show();
-                });
-
-        // Thêm yêu cầu vào hàng đợi
-        requestQueue.add(stringRequest);
-    }
-
-    private void drawPolylineOnMap(List<LatLng> path, LatLng origin, LatLng destination) {
-        if (path.isEmpty() || mMap == null) return;
+        // Thêm các marker
+        mMap.addMarker(new MarkerOptions().position(routePoints.get(0)).title("Điểm đi"));
+        mMap.addMarker(new MarkerOptions().position(routePoints.get(routePoints.size() - 1)).title("Điểm đến"));
 
         // Vẽ đường đi
-        mMap.addPolyline(new PolylineOptions().addAll(path).width(12).color(Color.BLUE).geodesic(true));
+        PolylineOptions polylineOptions = new PolylineOptions()
+                .addAll(routePoints)
+                .width(10)
+                .color(Color.BLUE);
+        mMap.addPolyline(polylineOptions);
 
-        // Thêm marker cho điểm đầu và cuối
-        mMap.addMarker(new MarkerOptions().position(origin).title("Điểm đi"));
-        mMap.addMarker(new MarkerOptions().position(destination).title("Điểm đến"));
-
-        // Zoom camera để thấy toàn bộ lộ trình
+        // Di chuyển camera
         LatLngBounds.Builder builder = new LatLngBounds.Builder();
-        for (LatLng point : path) {
+        for (LatLng point : routePoints) {
             builder.include(point);
         }
-        LatLngBounds bounds = builder.build();
-        int padding = 100; // Khoảng đệm từ mép màn hình (pixels)
-        mMap.moveCamera(CameraUpdateFactory.newLatLngBounds(bounds, padding));
+        mMap.moveCamera(CameraUpdateFactory.newLatLngBounds(builder.build(), 100));
     }
 }
