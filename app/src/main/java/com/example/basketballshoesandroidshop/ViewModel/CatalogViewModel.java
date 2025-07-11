@@ -8,6 +8,7 @@ import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.ViewModel;
 
 import com.example.basketballshoesandroidshop.Domain.ItemsModel;
+import com.example.basketballshoesandroidshop.Domain.VariationModel;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
@@ -125,6 +126,86 @@ public class CatalogViewModel extends ViewModel {
                     if (product != null) {
                         if (!searchContent.isEmpty() && !product.getTitle().toLowerCase().contains(searchContent)) {
                             continue; // bỏ qua nếu không khớp
+                        }
+                        if (product.getDescription().length() > 55) {
+                            product.setDescription(product.getDescription().substring(0, 55 - 3) + "...");
+                        }
+                        tempProducts.add(product);
+                    }
+                }
+
+                // Sort manually since Firebase Realtime DB only allows 1 orderBy* per query
+                Collections.sort(tempProducts, (p1, p2) -> {
+                    if (optInner.equals("price")) {
+                        return ascendingInner ? Double.compare(p1.getPrice(), p2.getPrice())
+                                : Double.compare(p2.getPrice(), p1.getPrice());
+                    } else if (optInner.equals("title")) {
+                        return ascendingInner ? p1.getTitle().compareToIgnoreCase(p2.getTitle())
+                                : p2.getTitle().compareToIgnoreCase(p1.getTitle());
+                    }
+                    return 0;
+                });
+
+                products = tempProducts;
+                productsLiveData.setValue(products);
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {
+                Log.e(TAG, "forceGet: onCancelled: " + error.getMessage());
+            }
+        });
+    }
+
+    public void forceGet(int categoryId, int option, double minPrice, double maxPrice, List<VariationModel> variationModels, String searchContent) {
+        DatabaseReference productsRef = FirebaseDatabase.getInstance().getReference("Items");
+        Query query = categoryId == 0 ? productsRef : productsRef.orderByChild("categoryId").equalTo(categoryId);
+
+        this.option = option;
+        String opt = "";
+        boolean ascending = true;
+
+        switch (option) {
+            case 0:
+                opt = "price";
+                ascending = false;
+                break;
+            case 1:
+                opt = "price";
+                ascending = true;
+                break;
+            case 2:
+                opt = "title";
+                ascending = false;
+                break;
+            case 3:
+                opt = "title";
+                ascending = true;
+                break;
+        }
+
+        Log.e(TAG, "forceGet: ordering by " + opt + " ascending=" + ascending);
+
+        final String optInner = opt;
+        boolean ascendingInner = ascending;
+        // Apply ordering inside result processing
+        query.addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
+                List<ItemsModel> tempProducts = new ArrayList<>();
+                for (DataSnapshot child : snapshot.getChildren()) {
+                    ItemsModel product = child.getValue(ItemsModel.class);
+                    if (product != null) {
+                        if (!searchContent.isEmpty() && !product.getTitle().toLowerCase().contains(searchContent)) {
+                            continue; // bỏ qua nếu không khớp
+                        }
+                        if (product.getPrice() < minPrice || product.getPrice() > maxPrice) {
+                            continue;
+                        }
+                        for (VariationModel variationModel : variationModels) {
+                            if (variationModel.inventory == 0) {
+                                continue;
+                            }
                         }
                         if (product.getDescription().length() > 55) {
                             product.setDescription(product.getDescription().substring(0, 55 - 3) + "...");

@@ -1,6 +1,8 @@
 package com.example.basketballshoesandroidshop.Domain;
 
-public class CategoryModel {
+import java.io.Serializable;
+
+public class CategoryModel implements Serializable {
     private String title;
     private int id;
     private String picUrl;

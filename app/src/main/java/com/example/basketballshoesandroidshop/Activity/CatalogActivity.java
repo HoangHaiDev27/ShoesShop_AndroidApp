@@ -8,11 +8,16 @@ import android.util.Log;
 import android.widget.EditText;
 import android.widget.GridView;
 
+import androidx.activity.result.ActivityResultLauncher;
+import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.lifecycle.ViewModelProvider;
 
 import com.example.basketballshoesandroidshop.Adapter.CatalogAdapter;
+import com.example.basketballshoesandroidshop.Domain.CategoryModel;
 import com.example.basketballshoesandroidshop.Domain.ItemsModel;
+import com.example.basketballshoesandroidshop.Domain.VariationModel;
+import com.example.basketballshoesandroidshop.Utils.Filter;
 import com.example.basketballshoesandroidshop.Utils.Sort;
 import com.example.basketballshoesandroidshop.ViewModel.CatalogViewModel;
 import com.example.basketballshoesandroidshop.databinding.ActivityCatalogBinding;
@@ -31,6 +36,12 @@ public class CatalogActivity extends AppCompatActivity {
     private EditText edtSearch;
     private Sort sort;
     private static final String TAG = "CatalogActivity";
+    
+    // Filter-related fields
+    private double minPrice = 0;
+    private double maxPrice = 100;
+    private List<VariationModel> selectedColors = new ArrayList<>();
+    private ActivityResultLauncher<Intent> filterLauncher;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -42,7 +53,7 @@ public class CatalogActivity extends AppCompatActivity {
         categoryId = intent.getIntExtra("categoryId", 1);
         categoryName = intent.getStringExtra("categoryName");
 
-
+        setupFilterLauncher();
         init();
         sort = new Sort(categoryId, viewModel, edtSearch.getText().toString().trim());
         loadData();
@@ -115,6 +126,80 @@ public class CatalogActivity extends AppCompatActivity {
 
         binding.btnSort.setOnClickListener(v -> {
             sort.show(getSupportFragmentManager(), "Sort");
+        });
+        
+        binding.btnFilter.setOnClickListener(v -> {
+            Intent filterIntent = new Intent(this, Filter.class);
+            filterIntent.putExtra("categoryId", categoryId);
+            filterIntent.putExtra("searchContent", edtSearch.getText().toString().trim());
+            
+            // Truyền filter state hiện tại để khôi phục
+            filterIntent.putExtra("currentMinPrice", minPrice);
+            filterIntent.putExtra("currentMaxPrice", maxPrice);
+            filterIntent.putExtra("currentSelectedColors", new ArrayList<>(selectedColors));
+            
+            Log.d(TAG, "Sending filter state - minPrice: " + minPrice + ", maxPrice: " + maxPrice + ", colors: " + selectedColors.size());
+            
+            filterLauncher.launch(filterIntent);
+        });
+    }
+    
+    private void setupFilterLauncher() {
+        filterLauncher = registerForActivityResult(
+            new ActivityResultContracts.StartActivityForResult(),
+            result -> {
+                if (result.getResultCode() == RESULT_OK && result.getData() != null) {
+                    Intent data = result.getData();
+                    
+                    // Nhận filter data từ Filter activity
+                    minPrice = data.getDoubleExtra("minPrice", 0);
+                    maxPrice = data.getDoubleExtra("maxPrice", 100);
+                    
+                    selectedColors = (List<VariationModel>) data.getSerializableExtra("selectedColors");
+                    
+                    if (selectedColors == null) selectedColors = new ArrayList<>();
+                    
+                    Log.d(TAG, "Filter data received - Colors: " + selectedColors.size());
+                    
+                    // Áp dụng filter
+                    applyFilters();
+                }
+            }
+        );
+    }
+    
+    private void applyFilters() {
+        String searchContent = edtSearch.getText().toString().trim();
+        
+        // Sử dụng method có sẵn trong CatalogViewModel với filter parameters
+        viewModel.forceGet(categoryId, 0, minPrice, maxPrice, selectedColors, searchContent);
+        
+        // Observe và update UI
+        viewModel.getAllProductsByCategory(categoryId).observe(this, productModels -> {
+            dataList = new ArrayList<>();
+            
+            for (ItemsModel product : productModels) {
+                // Filter theo colors nếu có
+                if (!selectedColors.isEmpty() && product.getColor() != null) {
+                    boolean matchColor = false;
+                    for (VariationModel color : selectedColors) {
+                        for (String productColor : product.getColor()) {
+                            if (productColor.toLowerCase().contains(color.name.toLowerCase())) {
+                                matchColor = true;
+                                break;
+                            }
+                        }
+                        if (matchColor) break;
+                    }
+                    if (!matchColor) continue;
+                }
+                
+                dataList.add(product);
+            }
+            
+            adapter = new CatalogAdapter(this, dataList.size(), dataList);
+            Log.e(TAG, "applyFilters: " + dataList.size() + " items found");
+            gridView.setAdapter(adapter);
         });
     }
 }

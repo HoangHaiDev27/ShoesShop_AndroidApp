@@ -27,4 +27,11 @@
     <color name="status_blue_bg">#E5F1FC</color>
     <color name="status_red_bg">#FDE8E9</color>
 
+    <!--  Charizard  -->
+    <color name="charizard_500">#FFD60A</color>
+    <color name="charizard_400">#FEE440</color>
+    <color name="charizard_300">#FEEB70</color>
+    <color name="charizard_200">#FEF2A0</color>
+    <color name="charizard_100">#FFF8CF</color>
+
 </resources>
