@@ -63,6 +63,10 @@ public class CatalogViewModel extends ViewModel {
                     try {
                         ItemsModel product = productSnapshot.getValue(ItemsModel.class);
                         if (product != null) {
+                            // Set id cho product từ key hoặc từ field id có sẵn
+                            if (product.getId() == null || product.getId().isEmpty()) {
+                                product.setId(productSnapshot.getKey()); // fallback to using Firebase key
+                            }
                             // Xử lý mô tả sản phẩm nếu cần
                             if (product.getDescription().length() > 55) {
                                 product.setDescription(product.getDescription().substring(0, 55 - 3) + "...");
@@ -124,6 +128,10 @@ public class CatalogViewModel extends ViewModel {
                 for (DataSnapshot child : snapshot.getChildren()) {
                     ItemsModel product = child.getValue(ItemsModel.class);
                     if (product != null) {
+                        // Set id cho product từ key hoặc từ field id có sẵn
+                        if (product.getId() == null || product.getId().isEmpty()) {
+                            product.setId(child.getKey()); // fallback to using Firebase key
+                        }
                         if (!searchContent.isEmpty() && !product.getTitle().toLowerCase().contains(searchContent)) {
                             continue; // bỏ qua nếu không khớp
                         }
@@ -196,6 +204,10 @@ public class CatalogViewModel extends ViewModel {
                 for (DataSnapshot child : snapshot.getChildren()) {
                     ItemsModel product = child.getValue(ItemsModel.class);
                     if (product != null) {
+                        // Set id cho product từ key hoặc từ field id có sẵn
+                        if (product.getId() == null || product.getId().isEmpty()) {
+                            product.setId(child.getKey()); // fallback to using Firebase key
+                        }
                         if (!searchContent.isEmpty() && !product.getTitle().toLowerCase().contains(searchContent)) {
                             continue; // bỏ qua nếu không khớp
                         }

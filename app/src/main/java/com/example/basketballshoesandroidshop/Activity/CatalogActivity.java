@@ -60,6 +60,15 @@ public class CatalogActivity extends AppCompatActivity {
         setUpEditText();
     }
 
+    @Override
+    protected void onResume() {
+        super.onResume();
+        // Refresh CatalogAdapter để cập nhật icon heart
+        if (adapter != null) {
+            adapter.notifyDataSetChanged();
+        }
+    }
+
     private void setUpEditText() {
         edtSearch.addTextChangedListener(new TextWatcher() {
             @Override

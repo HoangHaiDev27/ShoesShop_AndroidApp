@@ -70,6 +70,9 @@
             android:name=".Activity.ProfileActivity"
             android:exported="false" />
         <activity
+            android:name=".Activity.WishlistActivity"
+            android:exported="false" />
+        <activity
             android:name=".Activity.OrderDetailActivity"
             android:exported="false" />
         <activity
