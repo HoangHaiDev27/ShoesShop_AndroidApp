@@ -17,6 +17,14 @@ public class ItemsModel implements Serializable {
     private double rating;
     private int numberInCart;
     private int categoryId;
+    private String selectedColor;
+    private String selectedSize;
+
+    public String getSelectedColor() { return selectedColor; }
+    public void setSelectedColor(String selectedColor) { this.selectedColor = selectedColor; }
+
+    public String getSelectedSize() { return selectedSize; }
+    public void setSelectedSize(String selectedSize) { this.selectedSize = selectedSize; }
 
     public ItemsModel() {
     }

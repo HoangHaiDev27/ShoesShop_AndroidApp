@@ -2,6 +2,7 @@ package com.example.basketballshoesandroidshop.Activity;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.widget.Button;
 import android.widget.TextView;
 
 import androidx.activity.EdgeToEdge;
@@ -21,5 +22,12 @@ public class PaymentNotification extends AppCompatActivity {
         txtNotification = findViewById(R.id.textViewNotify);
         Intent intent = getIntent();
         txtNotification.setText(intent.getStringExtra("result"));
+        Button btnDone = findViewById(R.id.buttonDone);
+        btnDone.setOnClickListener( v -> {
+            Intent intentDone = new Intent(PaymentNotification.this, MainActivity.class);
+            intentDone.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP); // Xóa ngăn xếp, tránh tạo nhiều Activity
+            startActivity(intentDone);
+            finish();
+        });
     }
 }

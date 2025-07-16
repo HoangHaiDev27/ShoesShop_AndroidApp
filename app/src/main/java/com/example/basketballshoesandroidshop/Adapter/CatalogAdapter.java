@@ -2,6 +2,7 @@ package com.example.basketballshoesandroidshop.Adapter;
 
 import android.annotation.SuppressLint;
 import android.content.Context;
+import android.content.Intent;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -15,6 +16,7 @@ import androidx.annotation.NonNull;
 import androidx.core.content.ContextCompat;
 import androidx.lifecycle.LifecycleOwner;
 
+import com.example.basketballshoesandroidshop.Activity.DetailActivity;
 import com.example.basketballshoesandroidshop.Domain.ItemsModel;
 import com.example.basketballshoesandroidshop.R;
 import com.example.basketballshoesandroidshop.Repository.MainRepository;
@@ -140,6 +142,12 @@ public class CatalogAdapter extends ArrayAdapter<ItemsModel> {
                 }
             }
         });
+        convertView.setOnClickListener(v -> {
+            Intent intent = new Intent(context, DetailActivity.class);
+            intent.putExtra("object", item); // đảm bảo ItemsModel implements Serializable
+            context.startActivity(intent);
+        });
+
 
         return convertView;
     }

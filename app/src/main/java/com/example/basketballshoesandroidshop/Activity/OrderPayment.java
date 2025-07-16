@@ -12,10 +12,23 @@ import android.widget.Toast;
 import androidx.activity.EdgeToEdge;
 import androidx.appcompat.app.AppCompatActivity;
 
+import com.example.basketballshoesandroidshop.Domain.ItemsModel;
+import com.example.basketballshoesandroidshop.Helper.ManagmentCart;
 import com.example.basketballshoesandroidshop.Models.CreateOrder;
 import com.example.basketballshoesandroidshop.R;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ServerValue;
 
 import org.json.JSONObject;
+
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Locale;
+import java.util.Map;
 
 import vn.zalopay.sdk.Environment;
 import vn.zalopay.sdk.ZaloPayError;
@@ -63,10 +76,67 @@ public class OrderPayment extends AppCompatActivity {
                         ZaloPaySDK.getInstance().payOrder(OrderPayment.this, token, "demozpdk://app", new PayOrderListener() {
                             @Override
                             public void onPaymentSucceeded(String s, String s1, String s2) {
-                                Intent intent1 = new Intent(OrderPayment.this, PaymentNotification.class);
-                                intent1.putExtra("result", "Thanh toán thành công");
-                                startActivity(intent1);
+                                DatabaseReference database = FirebaseDatabase.getInstance().getReference();
+                                String userId = "user_001"; // hoặc lấy từ user đã login
+                                String shippingAddress = "456 Đường DEF, Quận UVW, Hà Nội";
+                                String paymentMethod = "ZaloPay";
+
+                                ManagmentCart managmentCart = new ManagmentCart(OrderPayment.this);
+                                ArrayList<ItemsModel> cartList = managmentCart.getListCart();
+                                double total = managmentCart.getTotalFee();
+
+                                // Tạo OrderItem mới
+                                DatabaseReference orderItemRef = database.child("OrderItem").push();
+                                String orderId = orderItemRef.getKey();
+
+                                List<Map<String, Object>> orderItems = new ArrayList<>();
+                                for (ItemsModel item : cartList) {
+                                    Map<String, Object> itemMap = new HashMap<>();
+                                    itemMap.put("itemId", item.getId());
+                                    itemMap.put("title", item.getTitle());
+                                    itemMap.put("price", item.getPrice());
+                                    itemMap.put("quantity", item.getNumberInCart());
+                                    itemMap.put("size", item.getSize() instanceof List ? ((List<?>) item.getSize()).get(0) : item.getSize()); // lấy size đầu tiên nếu là list
+                                    itemMap.put("picUrl", item.getPicUrl().get(0));
+                                    orderItems.add(itemMap);
+                                }
+
+                                // Lưu OrderItem
+                                orderItemRef.setValue(orderItems).addOnSuccessListener(aVoid -> {
+                                    // Sau khi lưu OrderItem thành công → tạo Order
+                                    Map<String, Object> orderData = new HashMap<>();
+                                    orderData.put("orderDate", ServerValue.TIMESTAMP);
+                                    orderData.put("isPaid", true);
+                                    orderData.put("isDelivered", false);
+                                    orderData.put("shippingAddress", shippingAddress);
+                                    orderData.put("paymentMethod", paymentMethod);
+                                    orderData.put("totalPrice", total);
+                                    orderData.put("orderStatus", "Chờ xác nhận");
+
+                                    // Tạo trackingEvents mặc định
+                                    List<Map<String, Object>> trackingEvents = new ArrayList<>();
+                                    Map<String, Object> event = new HashMap<>();
+                                    event.put("description", "Đặt hàng thành công");
+                                    event.put("timestamp", new SimpleDateFormat("dd 'Th'MM HH:mm", Locale.getDefault()).format(new Date()));
+                                    event.put("isCurrent", true);
+                                    trackingEvents.add(event);
+                                    orderData.put("trackingEvents", trackingEvents);
+
+                                    database.child("Orders").child(userId).child(orderId)
+                                            .setValue(orderData)
+                                            .addOnSuccessListener(aVoid2 -> {
+                                                // Xóa giỏ hàng trong Firebase
+                                                database.child("Cart").child(userId).removeValue()
+                                                        .addOnSuccessListener(unused -> {
+                                                            Intent intent1 = new Intent(OrderPayment.this, PaymentNotification.class);
+                                                            intent1.putExtra("result", "Thanh toán thành công");
+                                                            startActivity(intent1);
+                                                            finish();
+                                                        });
+                                            });
+                                });
                             }
+
 
                             @Override
                             public void onPaymentCanceled(String s, String s1) {

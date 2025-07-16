@@ -2,6 +2,7 @@ package com.example.basketballshoesandroidshop.Activity;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
@@ -16,19 +17,26 @@ import androidx.core.view.WindowInsetsCompat;
 import androidx.recyclerview.widget.LinearLayoutManager;
 
 import com.example.basketballshoesandroidshop.Adapter.CartAdapter;
+import com.example.basketballshoesandroidshop.Domain.CartItemModel;
+import com.example.basketballshoesandroidshop.Domain.ItemsModel;
 import com.example.basketballshoesandroidshop.Helper.ChangeNumberItemsListener;
 import com.example.basketballshoesandroidshop.Helper.ManagmentCart;
 import com.example.basketballshoesandroidshop.R;
+import com.example.basketballshoesandroidshop.Repository.MainRepository;
 import com.example.basketballshoesandroidshop.databinding.ActivityCartAcitivityBinding;
+
+import java.util.ArrayList;
+import java.util.List;
 
 public class CartAcitivity extends AppCompatActivity {
 
     private ActivityCartAcitivityBinding biding;
     private double tax;
     private ManagmentCart managementCart;
+    private MainRepository repository;
     Button  btnCheckout;
     TextView total;
-
+    String userId;
 
 
     @Override
@@ -39,6 +47,8 @@ public class CartAcitivity extends AppCompatActivity {
         setContentView(biding.getRoot());
 
         managementCart = new ManagmentCart(this);
+        repository = new MainRepository();
+        userId = "user_001";
         CalculatorCart();
         SetVariable();
         initCartList();
@@ -63,35 +73,81 @@ public class CartAcitivity extends AppCompatActivity {
     }
 
     private void initCartList() {
-        if(managementCart.getListCart().isEmpty()){
-            biding.emptyTxt.setVisibility(View.VISIBLE);
-            biding.scrollView2.setVisibility(View.GONE);
-        }else{
+        Log.d("CartDebug", "Loading cart for user: " + userId);
+
+        repository.getCartWithUserId(userId).observe(this, cartList -> {
+            if (cartList == null || cartList.isEmpty()) {
+                Log.d("CartDebug", "Cart is empty or null");
+                biding.emptyTxt.setVisibility(View.VISIBLE);
+                biding.scrollView2.setVisibility(View.GONE);
+                return;
+            }
+
+            Log.d("CartDebug", "Cart items fetched: " + cartList.size());
             biding.emptyTxt.setVisibility(View.GONE);
             biding.scrollView2.setVisibility(View.VISIBLE);
-        }
-        biding.cartView.setLayoutManager(new LinearLayoutManager(this,LinearLayoutManager.VERTICAL,false));
-        biding.cartView.setAdapter(
-                new CartAdapter(
-                        managementCart.getListCart(),
-                        () -> CalculatorCart(),
-                        this // đây là context
-                )
-        );
 
+            List<String> itemIds = new ArrayList<>();
+            for (CartItemModel cartItem : cartList) {
+                itemIds.add(cartItem.getItemId());
+            }
+
+            Log.d("CartDebug", "Item IDs to fetch: " + itemIds);
+
+            repository.getItemsByIds(itemIds).observe(this, items -> {
+                if (items == null || items.isEmpty()) {
+                    Log.d("CartDebug", "No ItemsModel found for these IDs");
+                    return;
+                }
+
+                Log.d("CartDebug", "ItemsModel fetched: " + items.size());
+
+                ArrayList<ItemsModel> displayItems = new ArrayList<>();
+                for (ItemsModel item : items) {
+                    for (CartItemModel cartItem : cartList) {
+                        if (item.getId().equals(cartItem.getItemId())) {
+                            item.setNumberInCart(cartItem.getQuantity());
+                            item.setSelectedColor(cartItem.getColor());
+                            item.setSelectedSize(cartItem.getSize());
+                            displayItems.add(item);
+
+                            Log.d("CartDebug", "Mapped item: " + item.getTitle() + " - Qty: " + cartItem.getQuantity());
+                            break;
+                        }
+                    }
+                }
+
+                Log.d("CartDebug", "Display items for adapter: " + displayItems.size());
+
+                biding.cartView.setLayoutManager(new LinearLayoutManager(this));
+                biding.cartView.setAdapter(new CartAdapter(displayItems, this::CalculatorCart, userId, repository));
+            });
+        });
     }
+
+
+
 
     private void SetVariable() {
         biding.backBtn.setOnClickListener(v->finish());
     }
 
     private void CalculatorCart() {
+        double delivery = 10;
         double percentTax = 0.02;
-        double delivey = 10;
-        double total = Math.round((managementCart.getTotalFee() + delivey)*100.0)/100.0;
-        double itemTotal = Math.round((managementCart.getTotalFee()*100.0))/100;
-        biding.totalFeeTxt.setText("$" +itemTotal);
-        biding.deliveryTxt.setText("$"+delivey);
-        biding.totalTxt.setText("$"+total);
+
+        // Lấy tổng giá từ Firebase
+        repository.getCartTotal(userId).observe(this, itemTotal -> {
+            if (itemTotal == null) itemTotal = 0.0;
+
+            double tax = itemTotal * percentTax;
+            double total = Math.round((itemTotal + delivery + tax) * 100.0) / 100.0;
+
+            // Cập nhật giao diện
+            biding.totalFeeTxt.setText("$" + String.format("%.2f", itemTotal));
+            biding.deliveryTxt.setText("$" + String.format("%.2f", delivery));
+            biding.totalTxt.setText("$" + String.format("%.2f", total));
+        });
     }
+
 }

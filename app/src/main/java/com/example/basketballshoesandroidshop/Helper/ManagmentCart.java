@@ -66,4 +66,9 @@ public class ManagmentCart {
         }
         return fee;
     }
+    public void clearCart() {
+        tinyDB.remove("CartList");
+        // Nếu có sử dụng danh sách đang hiển thị trong UI (RecyclerView), có thể cập nhật lại trong Activity
+        Toast.makeText(context, "Giỏ hàng đã được xoá", Toast.LENGTH_SHORT).show();
+    }
 }

@@ -5,21 +5,71 @@
     android:id="@+id/main"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/lightGrey"
-    android:padding="24dp"
+    android:background="@color/light_gray_background"
     tools:context=".Activity.PaymentNotification">
 
-    <TextView
-        android:id="@+id/textViewNotify"
-        android:layout_width="wrap_content"
+    <androidx.cardview.widget.CardView
+        android:id="@+id/cardNotification"
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:text="Thông Báo"
-        android:textSize="20sp"
-        android:textStyle="bold"
-        android:textColor="@color/black"
+        android:layout_margin="24dp"
+        android:padding="20dp"
+        android:elevation="6dp"
+        app:cardCornerRadius="16dp"
+        app:cardBackgroundColor="@color/white"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent" />
+        app:layout_constraintEnd_toEndOf="parent">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:gravity="center_horizontal">
+
+            <!-- Icon trạng thái -->
+            <ImageView
+                android:id="@+id/imageIcon"
+                android:layout_width="64dp"
+                android:layout_height="64dp"
+                android:layout_marginBottom="16dp"
+                android:contentDescription="Payment success icon" />
+
+            <!-- Tiêu đề thông báo -->
+            <TextView
+                android:id="@+id/textViewNotify"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Thanh Toán Thành Công"
+                android:textSize="20sp"
+                android:textStyle="bold"
+                android:textColor="@color/giratina_600"
+                android:layout_marginBottom="8dp" />
+
+            <!-- Mô tả -->
+            <TextView
+                android:id="@+id/textViewDescription"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Đơn hàng của bạn đã được xác nhận.\nCảm ơn bạn đã mua sắm!"
+                android:textSize="14sp"
+                android:textColor="@color/giratina_500"
+                android:gravity="center"
+                android:layout_marginBottom="16dp" />
+
+            <!-- Nút quay lại -->
+            <Button
+                android:id="@+id/buttonDone"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Về Trang Chủ"
+                android:backgroundTint="@color/primary_orange"
+                android:textColor="@android:color/white"
+                android:layout_marginTop="8dp"
+                android:layout_marginBottom="4dp" />
+
+        </LinearLayout>
+    </androidx.cardview.widget.CardView>
 
 </androidx.constraintlayout.widget.ConstraintLayout>
