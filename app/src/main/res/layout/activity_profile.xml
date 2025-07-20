@@ -12,30 +12,31 @@
         android:layout_height="wrap_content"
         android:orientation="vertical">
 
-        <androidx.constraintlayout.widget.ConstraintLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:background="#FF6600"
-            android:padding="16dp">
-
-
-
-        </androidx.constraintlayout.widget.ConstraintLayout>
-
+        <!-- Profile Info Section với Menu 3 chấm -->
         <LinearLayout
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
+            android:layout_height="131dp"
             android:background="#FF6600"
             android:gravity="center_vertical"
             android:orientation="horizontal"
             android:padding="16dp">
-
+            <ImageView
+                android:id="@+id/btnBack"
+                android:layout_width="25dp"
+                android:layout_height="42dp"
+                android:background="?android:attr/selectableItemBackgroundBorderless"
+                android:clickable="true"
+                android:focusable="true"
+                android:padding="4dp"
+                android:src="@drawable/ic_arrow_back"
+                app:tint="@color/white" />
+            <!-- Avatar -->
             <ImageView
                 android:layout_width="60dp"
                 android:layout_height="60dp"
-                android:src="@drawable/ic_account_circle"
-                app:tint="@android:color/white" />
+                android:src="@drawable/image1" />
 
+            <!-- User Info -->
             <LinearLayout
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
@@ -47,7 +48,7 @@
                     android:id="@+id/tvUsername"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="binvro6969"
+                    android:text="Loading..."
                     android:textColor="@android:color/white"
                     android:textSize="18sp"
                     android:textStyle="bold" />
@@ -59,8 +60,23 @@
                     android:text="0 Người theo dõi | 9 Đang theo dõi"
                     android:textColor="@android:color/white" />
             </LinearLayout>
+
+            <!-- Menu 3 chấm -->
+            <ImageView
+                android:id="@+id/btnMenu"
+                android:layout_width="63dp"
+                android:layout_height="58dp"
+                android:background="?android:attr/selectableItemBackgroundBorderless"
+                android:clickable="true"
+                android:contentDescription="Menu"
+                android:focusable="true"
+                android:padding="12dp"
+                android:src="@drawable/ic_more_vert"
+                app:tint="@android:color/white" />
+
         </LinearLayout>
 
+        <!-- Order Section -->
         <androidx.cardview.widget.CardView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"

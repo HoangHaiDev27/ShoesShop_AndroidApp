@@ -67,11 +67,28 @@
             android:name=".Activity.OrderHistoryActivity"
             android:exported="false" />
         <activity
-            android:name=".Activity.ProfileActivity"
-            android:exported="false" />
-        <activity
             android:name=".Activity.WishlistActivity"
             android:exported="false" />
+
+        <!-- Profile Related Activities -->
+        <activity
+            android:name=".Activity.ProfileActivity"
+            android:exported="false"
+             />
+        <activity
+            android:name=".Activity.ViewProfileActivity"
+            android:exported="false"
+             />
+        <activity
+            android:name=".Activity.EditProfileActivity"
+            android:exported="false"
+
+            android:windowSoftInputMode="adjustPan" />
+        <activity
+            android:name=".Activity.ChangePasswordActivity"
+            android:exported="false"
+
+            android:windowSoftInputMode="adjustPan" />
         <activity
             android:name=".Activity.OrderDetailActivity"
             android:exported="false" />

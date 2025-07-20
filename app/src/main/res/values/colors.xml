@@ -33,5 +33,37 @@
     <color name="charizard_300">#FEEB70</color>
     <color name="charizard_200">#FEF2A0</color>
     <color name="charizard_100">#FFF8CF</color>
+    <!-- Primary Colors -->
+    <color name="orange_primary">#FF6B35</color>
+    <color name="orange_dark">#E55A2B</color>
+    <color name="orange_light">#FF8A65</color>
 
+    <!-- Secondary Colors -->
+    <color name="black_primary">#1A1A1A</color>
+    <color name="gray_dark">#4A4A4A</color>
+    <color name="gray_medium">#9E9E9E</color>
+    <color name="gray_light">#E0E0E0</color>
+    <color name="gray_very_light">#F5F5F5</color>
+
+    <!-- Status Colors -->
+    <color name="green_success">#4CAF50</color>
+    <color name="red_error">#F44336</color>
+    <color name="blue_info">#2196F3</color>
+    <color name="yellow_warning">#FF9800</color>
+
+
+    <!-- Gradient Colors -->
+    <color name="gradient_start">#FF6B35</color>
+    <color name="gradient_end">#FFA726</color>
+
+    <!-- Background Colors -->
+    <color name="background_primary">#FFFFFF</color>
+    <color name="background_secondary">#F8F8F8</color>
+    <color name="card_background">#FFFFFF</color>
+
+    <!-- Text Colors -->
+    <color name="text_primary">#1A1A1A</color>
+    <color name="text_secondary">#4A4A4A</color>
+    <color name="text_hint">#9E9E9E</color>
+    <color name="text_white">#FFFFFF</color>
 </resources>

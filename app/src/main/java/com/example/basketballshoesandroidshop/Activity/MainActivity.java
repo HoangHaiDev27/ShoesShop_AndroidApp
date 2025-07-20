@@ -4,37 +4,41 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.EditText;
+import android.widget.ImageView;
+import android.widget.LinearLayout;
+import android.widget.TextView;
 
 import androidx.activity.EdgeToEdge;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.core.graphics.Insets;
-import androidx.core.view.ViewCompat;
-import androidx.core.view.WindowInsetsCompat;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.viewpager2.widget.CompositePageTransformer;
 import androidx.viewpager2.widget.MarginPageTransformer;
 
-import com.example.basketballshoesandroidshop.Adapter.CartAdapter;
 import com.example.basketballshoesandroidshop.Adapter.CategoryAdapter;
 import com.example.basketballshoesandroidshop.Adapter.PopularAdapter;
 import com.example.basketballshoesandroidshop.Adapter.SliderAdapter;
 import com.example.basketballshoesandroidshop.Domain.BannerModel;
+import com.example.basketballshoesandroidshop.Domain.User;
 import com.example.basketballshoesandroidshop.R;
+import com.example.basketballshoesandroidshop.Utils.SessionManager;
 import com.example.basketballshoesandroidshop.ViewModel.MainViewModel;
 import com.example.basketballshoesandroidshop.databinding.ActivityMainBinding;
 import com.ismaeldivita.chipnavigation.ChipNavigationBar;
 
-import java.io.FileInputStream;
-import java.io.IOException;
 import java.util.ArrayList;
 
 public class MainActivity extends AppCompatActivity {
     private ActivityMainBinding binding;
     private MainViewModel viewModel;
     private EditText edtSearch;
-    private CategoryAdapter categoryAdapter; // Lưu reference đến CategoryAdapter
-    private PopularAdapter popularAdapter; // Lưu reference đến PopularAdapter
+    private CategoryAdapter categoryAdapter;
+    private PopularAdapter popularAdapter;
+
+    // Session and User
+    private SessionManager sessionManager;
+    private TextView tvWelcomeBack, tvUserName;
+    private LinearLayout llUserProfile;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -44,44 +48,107 @@ public class MainActivity extends AppCompatActivity {
         setContentView(binding.getRoot());
         viewModel = new MainViewModel();
 
+        // Initialize session manager
+        sessionManager = new SessionManager(this);
+
+        // Check if user is logged in
+        if (!sessionManager.isLoggedIn()) {
+            goToLogin();
+            return;
+        }
+
+        // Initialize views and user info
+        initUserInfo();
         initCategory();
         initSlider();
         initPopular();
         bottomNavigation();
         navigateToCatalog();
+        setupProfileClick();
     }
 
     @Override
     protected void onResume() {
         super.onResume();
+        // Update user info when returning to MainActivity
+        updateUserInfo();
+
         // Đảm bảo Home tab luôn được set active khi quay về MainActivity
         if (binding != null && binding.bottomNavigation != null) {
             binding.bottomNavigation.setItemSelected(R.id.home, true);
         }
-        
+
         // Reset category selection về trạng thái ban đầu
         if (categoryAdapter != null) {
             categoryAdapter.resetSelection();
         }
-        
+
         // Refresh PopularAdapter để cập nhật icon heart
         if (popularAdapter != null) {
             popularAdapter.notifyDataSetChanged();
         }
     }
 
-    private void navigateToCatalog() {
-        edtSearch = findViewById(R.id.editTextText); // ID của ô tìm kiếm trong layout
+    private void initUserInfo() {
+        // Find TextViews for user info
+        tvWelcomeBack = findViewById(R.id.textView);
+        tvUserName = findViewById(R.id.textView2);
 
-        // Lắng nghe sự kiện nhấn vào ô tìm kiếm
+        // Find the LinearLayout containing user profile
+        llUserProfile = findViewById(R.id.llUserProfile); // You'll need to add this ID to layout
+
+        // Update user info
+        updateUserInfo();
+    }
+
+    private void updateUserInfo() {
+        User currentUser = sessionManager.getUserFromSession();
+        if (currentUser != null) {
+            tvWelcomeBack.setText("Welcome back");
+            tvUserName.setText(currentUser.getName());
+        } else {
+            // If no user found, redirect to login
+            goToLogin();
+        }
+    }
+
+    private void setupProfileClick() {
+        // Set click listener for user profile area
+        View profileArea = findViewById(R.id.llUserProfile);
+        if (profileArea != null) {
+            profileArea.setOnClickListener(v -> {
+                Intent intent = new Intent(MainActivity.this, ProfileActivity.class);
+                startActivity(intent);
+            });
+        }
+
+        // Also set click listener for profile image
+        ImageView profileImage = findViewById(R.id.imageView2);
+        if (profileImage != null) {
+            profileImage.setOnClickListener(v -> {
+                Intent intent = new Intent(MainActivity.this, ProfileActivity.class);
+                startActivity(intent);
+            });
+        }
+    }
+
+    private void goToLogin() {
+        Intent intent = new Intent(MainActivity.this, LoginActivity.class);
+        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+        startActivity(intent);
+        finish();
+    }
+
+    private void navigateToCatalog() {
+        edtSearch = findViewById(R.id.editTextText);
         edtSearch.setOnClickListener(v -> {
             Intent intent = new Intent(MainActivity.this, CatalogActivity.class);
-            startActivity(intent); // Mở Activity tìm kiếm
+            startActivity(intent);
         });
     }
 
     private void bottomNavigation() {
-        binding.bottomNavigation.setItemSelected(R.id.home, true); // đặt mặc định
+        binding.bottomNavigation.setItemSelected(R.id.home, true);
 
         binding.bottomNavigation.setOnItemSelectedListener(new ChipNavigationBar.OnItemSelectedListener() {
             @Override
@@ -106,8 +173,6 @@ public class MainActivity extends AppCompatActivity {
         });
     }
 
-
-
     private void initPopular() {
         binding.progressBarPopular.setVisibility(View.VISIBLE);
         viewModel.loadPopular().observeForever(itemsModels -> {
@@ -115,7 +180,6 @@ public class MainActivity extends AppCompatActivity {
                 binding.popularView.setLayoutManager(
                         new LinearLayoutManager(MainActivity.this,LinearLayoutManager.HORIZONTAL,false)
                 );
-                // Tạo và lưu reference đến PopularAdapter
                 popularAdapter = new PopularAdapter(itemsModels);
                 binding.popularView.setAdapter(popularAdapter);
                 binding.popularView.setNestedScrollingEnabled(true);
@@ -154,13 +218,11 @@ public class MainActivity extends AppCompatActivity {
         viewModel.loadCategory().observeForever(categoryModels -> {
             binding.categoryView.setLayoutManager(new LinearLayoutManager(
                     MainActivity.this, LinearLayoutManager.HORIZONTAL, false));
-            
-            // Tạo và lưu reference đến CategoryAdapter
+
             categoryAdapter = new CategoryAdapter(categoryModels);
             binding.categoryView.setAdapter(categoryAdapter);
             binding.categoryView.setNestedScrollingEnabled(true);
             binding.progressBarCategory.setVisibility(View.GONE);
         });
     }
-
 }

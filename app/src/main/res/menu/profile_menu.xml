@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <item
+        android:id="@+id/menu_view_profile"
+        android:title="Xem thông tin cá nhân"
+        android:icon="@drawable/ic_person" />
+
+    <item
+        android:id="@+id/menu_edit_profile"
+        android:title="Cập nhật thông tin"
+        android:icon="@drawable/ic_edit" />
+
+    <item
+        android:id="@+id/menu_change_password"
+        android:title="Đổi mật khẩu"
+        android:icon="@drawable/ic_lock" />
+
+    <item
+        android:id="@+id/menu_logout"
+        android:title="Đăng xuất"
+        android:icon="@drawable/ic_logout" />
+
+</menu>
