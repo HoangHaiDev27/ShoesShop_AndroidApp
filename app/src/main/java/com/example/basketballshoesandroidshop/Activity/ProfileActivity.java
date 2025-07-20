@@ -3,14 +3,20 @@ package com.example.basketballshoesandroidshop.Activity;
 import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.MenuItem;
+import android.widget.ImageView;
+import android.widget.PopupMenu;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
+import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 
+import com.example.basketballshoesandroidshop.Domain.User;
 import com.example.basketballshoesandroidshop.R;
+import com.example.basketballshoesandroidshop.Utils.SessionManager;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
@@ -20,23 +26,40 @@ import com.google.firebase.database.ValueEventListener;
 public class ProfileActivity extends AppCompatActivity {
 
     private TextView tvUsername;
+    private ImageView btnMenu;
     private DatabaseReference databaseReference;
+    private SessionManager sessionManager;
+    private String currentUserId;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_profile);
 
-        // Ánh xạ TextView từ layout
-        tvUsername = findViewById(R.id.tvUsername);
+        // Initialize session manager
+        sessionManager = new SessionManager(this);
 
+        // Check if user is logged in
+        if (!sessionManager.isLoggedIn()) {
+            goToLogin();
+            return;
+        }
+
+        // Get current user ID from session
+        currentUserId = sessionManager.getCurrentUserId();
+
+        // Ánh xạ views từ layout
+        tvUsername = findViewById(R.id.tvUsername);
+        btnMenu = findViewById(R.id.btnMenu);
+        ImageView btnBack = findViewById(R.id.btnBack);
         // Lấy tham chiếu đến Firebase Database
         databaseReference = FirebaseDatabase.getInstance().getReference();
 
-        // Giả sử chúng ta đang lấy thông tin cho user_001
-        // Trong ứng dụng thực tế, bạn sẽ lấy ID của người dùng đã đăng nhập
-        String currentUserId = "user_001";
-        fetchAndDisplayUsername(currentUserId);
+        // Load user info
+        loadUserInfo();
+
+        // Setup menu click listener
+        setupMenuListener();
 
         // Bắt sự kiện click cho "Xem lịch sử mua hàng"
         RelativeLayout rlPurchaseHistory = findViewById(R.id.rlPurchaseHistory);
@@ -46,6 +69,111 @@ public class ProfileActivity extends AppCompatActivity {
         });
 
         setupStatusIconListeners();
+    }
+
+    private void setupMenuListener() {
+        btnMenu.setOnClickListener(v -> showProfileMenu());
+        findViewById(R.id.btnBack).setOnClickListener(v -> finish());
+    }
+
+    private void showProfileMenu() {
+        PopupMenu popupMenu = new PopupMenu(this, btnMenu);
+        popupMenu.getMenuInflater().inflate(R.menu.profile_menu, popupMenu.getMenu());
+
+        popupMenu.setOnMenuItemClickListener(new PopupMenu.OnMenuItemClickListener() {
+            @Override
+            public boolean onMenuItemClick(MenuItem item) {
+                int id = item.getItemId();
+
+                if (id == R.id.menu_view_profile) {
+                    // Xem thông tin cá nhân
+                    viewUserProfile();
+                    return true;
+                } else if (id == R.id.menu_edit_profile) {
+                    // Cập nhật thông tin
+                    editUserProfile();
+                    return true;
+                } else if (id == R.id.menu_change_password) {
+                    // Đổi mật khẩu
+                    changePassword();
+                    return true;
+                } else if (id == R.id.menu_logout) {
+                    // Đăng xuất
+                    showLogoutDialog();
+                    return true;
+                }
+                return false;
+            }
+        });
+
+        popupMenu.show();
+    }
+
+    private void viewUserProfile() {
+        Intent intent = new Intent(ProfileActivity.this, ViewProfileActivity.class);
+        startActivity(intent);
+    }
+
+    private void editUserProfile() {
+        Intent intent = new Intent(ProfileActivity.this, EditProfileActivity.class);
+        startActivity(intent);
+    }
+
+    private void changePassword() {
+        Intent intent = new Intent(ProfileActivity.this, ChangePasswordActivity.class);
+        startActivity(intent);
+    }
+
+    private void showLogoutDialog() {
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setTitle("Đăng xuất")
+                .setMessage("Bạn có chắc chắn muốn đăng xuất?")
+                .setPositiveButton("Đăng xuất", (dialog, which) -> logout())
+                .setNegativeButton("Hủy", null)
+                .show();
+    }
+
+    /*private void logout() {
+        // Clear session
+        sessionManager.logout();
+
+        Toast.makeText(this, "Đã đăng xuất!", Toast.LENGTH_SHORT).show();
+
+        // Go to login
+        goToLogin();
+    }*/
+    private void logout() {
+        // Clear session nhưng giữ Remember Me nếu có
+        if (sessionManager.isRememberMe()) {
+            sessionManager.logoutKeepRemember();
+        } else {
+            sessionManager.logout();
+        }
+
+        Toast.makeText(this, "Đã đăng xuất!", Toast.LENGTH_SHORT).show();
+
+        // Go to login
+        goToLogin();
+    }
+    private void goToLogin() {
+        Intent intent = new Intent(ProfileActivity.this, LoginActivity.class);
+        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+        startActivity(intent);
+        finish();
+    }
+
+    private void loadUserInfo() {
+        if (currentUserId != null && !currentUserId.isEmpty()) {
+            fetchAndDisplayUsername(currentUserId);
+        } else {
+            // If no user ID, get from session
+            User currentUser = sessionManager.getUserFromSession();
+            if (currentUser != null) {
+                tvUsername.setText(currentUser.getName());
+            } else {
+                goToLogin();
+            }
+        }
     }
 
     private void setupStatusIconListeners() {
@@ -89,5 +217,12 @@ public class ProfileActivity extends AppCompatActivity {
                 Toast.makeText(ProfileActivity.this, "Lỗi khi tải tên người dùng.", Toast.LENGTH_SHORT).show();
             }
         });
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        // Reload user info when returning to profile
+        loadUserInfo();
     }
 }

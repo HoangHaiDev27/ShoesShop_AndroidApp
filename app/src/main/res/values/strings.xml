@@ -4,4 +4,75 @@
     <string name="subtitle_splash">Get personalized recommendations \n Enjoy fast, free shipping</string>
     <string name="singin">Already have an account? <font color="#DC6F31">Sign in</font> </string>
     <string name="map_api" translatable="false">API_KEY</string>
+    <!-- Login Screen -->
+    <string name="login_title">Đăng Nhập</string>
+    <string name="login_subtitle">Chào mừng bạn quay trở lại!</string>
+    <string name="email_hint">Email</string>
+    <string name="password_hint">Mật khẩu</string>
+    <string name="remember_me">Ghi nhớ đăng nhập</string>
+    <string name="forgot_password">Quên mật khẩu?</string>
+    <string name="login_button">Đăng Nhập</string>
+    <string name="signup_button_login">Tạo Tài Khoản</string>
+    <string name="no_account">Chưa có tài khoản?</string>
+    <string name="signup_link">Đăng ký ngay</string>
+
+    <!-- Sign Up Screen -->
+    <string name="signup_title">Tạo Tài Khoản</string>
+    <string name="signup_subtitle">Điền thông tin để bắt đầu mua sắm</string>
+    <string name="name_hint">Họ và tên</string>
+    <string name="password_hint_signup">Mật khẩu (tối thiểu 6 ký tự)</string>
+    <string name="phone_hint">Số điện thoại</string>
+    <string name="address_hint">Địa chỉ</string>
+    <string name="signup_button">Tạo Tài Khoản</string>
+    <string name="terms_privacy">Bằng việc đăng ký, bạn đồng ý với Điều khoản sử dụng và Chính sách bảo mật của chúng tôi.</string>
+    <string name="have_account">Đã có tài khoản?</string>
+    <string name="login_link">Đăng nhập</string>
+
+    <!-- Validation Messages -->
+    <string name="error_name_empty">Tên không được để trống</string>
+    <string name="error_name_short">Tên phải có ít nhất 2 ký tự</string>
+    <string name="error_email_empty">Email không được để trống</string>
+    <string name="error_email_invalid">Email không đúng định dạng</string>
+    <string name="error_email_exists">Email đã được sử dụng</string>
+    <string name="error_email_not_found">Email chưa được đăng ký</string>
+    <string name="error_password_empty">Mật khẩu không được để trống</string>
+    <string name="error_password_short">Mật khẩu phải có ít nhất 6 ký tự</string>
+    <string name="error_password_wrong">Mật khẩu không chính xác</string>
+    <string name="error_phone_empty">Số điện thoại không được để trống</string>
+    <string name="error_phone_invalid">Số điện thoại không đúng định dạng</string>
+    <string name="error_address_empty">Địa chỉ không được để trống</string>
+    <string name="error_address_short">Địa chỉ phải có ít nhất 10 ký tự</string>
+
+    <!-- Success Messages -->
+    <string name="signup_success">Đăng ký thành công!</string>
+    <string name="login_success">Đăng nhập thành công! Chào mừng %1$s</string>
+    <string name="logout_success">Đã đăng xuất!</string>
+
+    <!-- Error Messages -->
+    <string name="signup_failed">Đăng ký thất bại: %1$s</string>
+    <string name="login_failed">Đăng nhập thất bại</string>
+    <string name="network_error">Lỗi kết nối: %1$s</string>
+    <string name="database_error">Lỗi kết nối database</string>
+
+    <!-- Dialog Messages -->
+    <string name="logout_title">Đăng xuất</string>
+    <string name="logout_message">Bạn có chắc chắn muốn đăng xuất?</string>
+    <string name="logout_confirm">Đăng xuất</string>
+    <string name="cancel">Hủy</string>
+    <string name="close">Đóng</string>
+
+    <!-- Profile -->
+    <string name="profile_title">Thông tin cá nhân</string>
+    <string name="profile_edit">Chỉnh sửa</string>
+    <string name="feature_coming_soon">Tính năng này sẽ được phát triển</string>
+
+    <!-- Common -->
+    <string name="loading">Đang tải...</string>
+    <string name="please_wait">Vui lòng đợi...</string>
+    <string name="back">Quay lại</string>
+    <string name="welcome">Chào mừng</string>
+
+    <!-- Splash Screen -->
+    <string name="app_tagline">Android Shop</string>
+    <string name="version">Version 1.0</string>
 </resources>
