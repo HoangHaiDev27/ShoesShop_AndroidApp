@@ -5,6 +5,7 @@ import android.util.Log;
 import androidx.annotation.NonNull;
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
+import androidx.lifecycle.Observer;
 
 import com.example.basketballshoesandroidshop.Domain.BannerModel;
 import com.example.basketballshoesandroidshop.Domain.CartItemModel;
@@ -25,6 +26,7 @@ import java.util.List;
 public class MainRepository {
     private final FirebaseDatabase firebaseDatabase = FirebaseDatabase.getInstance();
     private final DatabaseReference databaseReference = firebaseDatabase.getReference();
+
     public LiveData<ArrayList<CategoryModel>> loadCategory() {
         MutableLiveData<ArrayList<CategoryModel>> listData = new MutableLiveData<>();
         DatabaseReference ref = firebaseDatabase.getReference("Category");
@@ -34,7 +36,8 @@ public class MainRepository {
                 ArrayList<CategoryModel> list = new ArrayList<>();
                 for (DataSnapshot childSnapshot : snapshot.getChildren()) {
                     CategoryModel item = childSnapshot.getValue(CategoryModel.class);
-                    if (item != null) list.add(item);
+                    if (item != null)
+                        list.add(item);
                 }
                 listData.setValue(list);
             }
@@ -56,7 +59,8 @@ public class MainRepository {
                 ArrayList<BannerModel> list = new ArrayList<>();
                 for (DataSnapshot childSnapshot : snapshot.getChildren()) {
                     BannerModel item = childSnapshot.getValue(BannerModel.class);
-                    if (item != null) list.add(item);
+                    if (item != null)
+                        list.add(item);
                 }
                 listData.setValue(list);
             }
@@ -118,7 +122,8 @@ public class MainRepository {
                 ArrayList<String> itemIds = new ArrayList<>();
                 for (DataSnapshot childSnapshot : snapshot.getChildren()) {
                     WishlistModel item = childSnapshot.getValue(WishlistModel.class);
-                    if (item != null) itemIds.add(item.getItemId());
+                    if (item != null)
+                        itemIds.add(item.getItemId());
                 }
                 listData.setValue(itemIds);
             }
@@ -147,7 +152,7 @@ public class MainRepository {
         });
         return isInWishlist;
     }
-    
+
     // Method to check wishlist status only once (for click events)
     public void checkWishlistStatus(String userId, String itemId, WishlistStatusCallback callback) {
         DatabaseReference ref = firebaseDatabase.getReference("Wishlist").child(userId).child(itemId);
@@ -163,7 +168,7 @@ public class MainRepository {
             }
         });
     }
-    
+
     // Callback interface for single check
     public interface WishlistStatusCallback {
         void onResult(boolean isInWishlist);
@@ -198,29 +203,29 @@ public class MainRepository {
                         DatabaseReference itemRef = firebaseDatabase.getReference("Items");
                         itemRef.orderByChild("id").equalTo(wishlistItem.getItemId())
                                 .addListenerForSingleValueEvent(new ValueEventListener() {
-                            @Override
-                            public void onDataChange(@NonNull DataSnapshot itemSnapshot) {
-                                for (DataSnapshot itemChild : itemSnapshot.getChildren()) {
-                                    ItemsModel item = itemChild.getValue(ItemsModel.class);
-                                    if (item != null) {
-                                        // Set id cho item từ key hoặc từ field id có sẵn
-                                        if (item.getId() == null || item.getId().isEmpty()) {
-                                            item.setId(itemChild.getKey()); // fallback to using Firebase key
+                                    @Override
+                                    public void onDataChange(@NonNull DataSnapshot itemSnapshot) {
+                                        for (DataSnapshot itemChild : itemSnapshot.getChildren()) {
+                                            ItemsModel item = itemChild.getValue(ItemsModel.class);
+                                            if (item != null) {
+                                                // Set id cho item từ key hoặc từ field id có sẵn
+                                                if (item.getId() == null || item.getId().isEmpty()) {
+                                                    item.setId(itemChild.getKey()); // fallback to using Firebase key
+                                                }
+                                                items.add(item);
+                                            }
                                         }
-                                        items.add(item);
+                                        // Cập nhật khi đã fetch xong tất cả items
+                                        if (items.size() == totalItems) {
+                                            listData.setValue(items);
+                                        }
                                     }
-                                }
-                                // Cập nhật khi đã fetch xong tất cả items
-                                if (items.size() == totalItems) {
-                                    listData.setValue(items);
-                                }
-                            }
 
-                            @Override
-                            public void onCancelled(@NonNull DatabaseError error) {
+                                    @Override
+                                    public void onCancelled(@NonNull DatabaseError error) {
 
-                            }
-                        });
+                                    }
+                                });
                     }
                 }
             }
@@ -233,11 +238,11 @@ public class MainRepository {
 
         return listData;
     }
+
     public Task<Void> addToCart(String userId, CartItemModel newItem) {
         DatabaseReference cartItemRef = firebaseDatabase
                 .getReference("Cart")
                 .child(userId)
-                .child("items")
                 .child(newItem.getItemId());
 
         TaskCompletionSource<Void> taskCompletionSource = new TaskCompletionSource<>();
@@ -276,20 +281,19 @@ public class MainRepository {
         return taskCompletionSource.getTask();
     }
 
-
-
     // Xóa sản phẩm khỏi giỏ hàng
     public Task<Void> deleteFromCart(String userId, String itemId) {
         DatabaseReference cartRef = firebaseDatabase.getReference("Cart").child(userId).child(itemId);
         return cartRef.removeValue();
     }
-    //load cart with user id
+
+    // load cart with user id
     public LiveData<List<CartItemModel>> getCartWithUserId(String userId) {
         MutableLiveData<List<CartItemModel>> liveData = new MutableLiveData<>();
 
         Log.d("CartDebug", "Fetching cart for user: " + userId);
 
-        databaseReference.child("Cart").child(userId).child("items")
+        databaseReference.child("Cart").child(userId)
                 .addListenerForSingleValueEvent(new ValueEventListener() {
                     @Override
                     public void onDataChange(@NonNull DataSnapshot snapshot) {
@@ -319,19 +323,29 @@ public class MainRepository {
         return liveData;
     }
 
-
     // Giả sử bạn đã có model CartItemModel với các trường như price và quantity
     public LiveData<Double> getCartTotal(String userId) {
         MutableLiveData<Double> totalLiveData = new MutableLiveData<>();
-        getCartWithUserId(userId).observeForever(cartItems -> {
-            double total = 0;
-            for (CartItemModel item : cartItems) {
-                total += item.getPrice() * item.getQuantity();  // Sử dụng quantity thay cho numberInCart
+        LiveData<List<CartItemModel>> cartLiveData = getCartWithUserId(userId);
+
+        Observer<List<CartItemModel>> observer = new Observer<List<CartItemModel>>() {
+            @Override
+            public void onChanged(List<CartItemModel> cartItems) {
+                double total = 0;
+                for (CartItemModel item : cartItems) {
+                    double price = item.getPrice() != 0 ? item.getPrice() : 0;
+                    int quantity = item.getQuantity() != 0 ? item.getQuantity() : 0;
+                    total += price * quantity;
+                }
+                totalLiveData.setValue(total);
+                cartLiveData.removeObserver(this); // 👈 Rất quan trọng để tránh memory leak
             }
-            totalLiveData.setValue(total);
-        });
+        };
+
+        cartLiveData.observeForever(observer);
         return totalLiveData;
     }
+
     public LiveData<ArrayList<ItemsModel>> getItemsByIds(List<String> itemIds) {
         MutableLiveData<ArrayList<ItemsModel>> liveData = new MutableLiveData<>();
         databaseReference.child("Items").addListenerForSingleValueEvent(new ValueEventListener() {
@@ -354,10 +368,10 @@ public class MainRepository {
         });
         return liveData;
     }
+
     public Task<Void> updateCartItemQuantity(String userId, String itemId, int quantity) {
         return firebaseDatabase.getReference("Cart")
                 .child(userId)
-                .child("items")
                 .child(itemId)
                 .child("quantity")
                 .setValue(quantity);
@@ -366,17 +380,8 @@ public class MainRepository {
     public Task<Void> removeItemFromCart(String userId, String itemId) {
         return firebaseDatabase.getReference("Cart")
                 .child(userId)
-                .child("items")
                 .child(itemId)
                 .removeValue();
     }
-
-
-
-
-
-
-
-
 
 }
