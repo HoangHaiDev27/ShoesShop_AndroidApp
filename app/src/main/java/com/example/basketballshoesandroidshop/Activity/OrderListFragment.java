@@ -19,6 +19,7 @@ import com.example.basketballshoesandroidshop.Adapter.OrderAdapter;
 import com.example.basketballshoesandroidshop.Domain.OrderItemModel;
 import com.example.basketballshoesandroidshop.Domain.OrderModel;
 import com.example.basketballshoesandroidshop.R;
+import com.example.basketballshoesandroidshop.Utils.SessionManager;
 import com.google.firebase.FirebaseApp;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
@@ -36,7 +37,10 @@ import java.util.concurrent.atomic.AtomicInteger;
 public class OrderListFragment extends Fragment {
 
     private static final String ARG_STATUS = "status";
+    private static final String ARG_USER_ID = "userId";
     private String orderStatus;
+
+    private String currentUserId;
 
     private RecyclerView recyclerView;
     private OrderAdapter adapter;
@@ -51,10 +55,11 @@ public class OrderListFragment extends Fragment {
         // Required empty public constructor
     }
 
-    public static OrderListFragment newInstance(String status) {
+    public static OrderListFragment newInstance(String status, String userId) {
         OrderListFragment fragment = new OrderListFragment();
         Bundle args = new Bundle();
         args.putString(ARG_STATUS, status);
+        args.putString(ARG_USER_ID, userId);
         fragment.setArguments(args);
         return fragment;
     }
@@ -64,6 +69,7 @@ public class OrderListFragment extends Fragment {
         super.onCreate(savedInstanceState);
         if (getArguments() != null) {
             orderStatus = getArguments().getString(ARG_STATUS);
+            currentUserId = getArguments().getString(ARG_USER_ID);
         }
         // Lấy reference đến gốc của Realtime Database
         databaseReference = FirebaseDatabase.getInstance().getReference();
@@ -101,7 +107,16 @@ public class OrderListFragment extends Fragment {
         progressBar.setVisibility(View.VISIBLE);
         textViewNoOrders.setVisibility(View.GONE);
 
-        String currentUserId = "user_001";
+
+
+        if (currentUserId == null) {
+            // Nếu chưa đăng nhập, không thực hiện truy vấn
+            progressBar.setVisibility(View.GONE);
+            textViewNoOrders.setText("Vui lòng đăng nhập để xem đơn hàng.");
+            textViewNoOrders.setVisibility(View.VISIBLE);
+            Log.d("FetchOrders", "User chưa đăng nhập.");
+            return;
+        }
 
         Query query = databaseReference.child("Orders").child(currentUserId)
                 .orderByChild("orderStatus")

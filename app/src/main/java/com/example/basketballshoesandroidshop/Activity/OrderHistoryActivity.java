@@ -9,6 +9,7 @@ import androidx.viewpager2.widget.ViewPager2;
 
 import com.example.basketballshoesandroidshop.Adapter.OrdersPagerAdapter;
 import com.example.basketballshoesandroidshop.R;
+import com.example.basketballshoesandroidshop.Utils.SessionManager;
 import com.google.android.material.tabs.TabLayout;
 import com.google.android.material.tabs.TabLayoutMediator;
 
@@ -25,11 +26,13 @@ public class OrderHistoryActivity extends AppCompatActivity {
         setSupportActionBar(toolbar);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         getSupportActionBar().setDisplayShowHomeEnabled(true);
+        SessionManager sessionManager = new SessionManager(this);
+        String currentUserId = "user_001";
 
         ViewPager2 viewPager = findViewById(R.id.viewPager);
         TabLayout tabLayout = findViewById(R.id.tabLayout);
 
-        OrdersPagerAdapter pagerAdapter = new OrdersPagerAdapter(this, titles);
+        OrdersPagerAdapter pagerAdapter = new OrdersPagerAdapter(this, titles, currentUserId);
         viewPager.setAdapter(pagerAdapter);
 
         new TabLayoutMediator(tabLayout, viewPager,
