@@ -240,40 +240,90 @@ public class MainRepository {
     }
 
     public Task<Void> addToCart(String userId, CartItemModel newItem) {
-        DatabaseReference cartItemRef = firebaseDatabase
-                .getReference("Cart")
-                .child(userId)
-                .child(newItem.getItemId());
+        DatabaseReference cartUserRef = firebaseDatabase.getReference("Cart").child(userId);
+        DatabaseReference cartItemRef = cartUserRef.child(newItem.getItemId());
 
         TaskCompletionSource<Void> taskCompletionSource = new TaskCompletionSource<>();
 
-        cartItemRef.addListenerForSingleValueEvent(new ValueEventListener() {
+        Log.d("CartDebug", "addToCart called for user: " + userId + ", item: " + newItem.getItemId());
+        cartUserRef.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
-            public void onDataChange(@NonNull DataSnapshot snapshot) {
-                if (snapshot.exists()) {
-                    CartItemModel existingItem = snapshot.getValue(CartItemModel.class);
-                    if (existingItem != null) {
-                        int updatedQuantity = existingItem.getQuantity() + 1;
-                        existingItem.setQuantity(updatedQuantity);
-                        cartItemRef.setValue(existingItem)
-                                .addOnSuccessListener(taskCompletionSource::setResult)
-                                .addOnFailureListener(taskCompletionSource::setException);
-                    } else {
-                        // Dữ liệu hỏng, ghi lại từ đầu
-                        cartItemRef.setValue(newItem)
-                                .addOnSuccessListener(taskCompletionSource::setResult)
-                                .addOnFailureListener(taskCompletionSource::setException);
-                    }
-                } else {
-                    // Sản phẩm chưa có, thêm mới
+            public void onDataChange(@NonNull DataSnapshot userCartSnapshot) {
+                if (!userCartSnapshot.exists()) {
+                    Log.d("CartDebug",
+                            "User cart does not exist. Creating cart and adding item: " + newItem.getItemId());
                     cartItemRef.setValue(newItem)
-                            .addOnSuccessListener(taskCompletionSource::setResult)
-                            .addOnFailureListener(taskCompletionSource::setException);
+                            .addOnSuccessListener(aVoid -> {
+                                Log.d("CartDebug", "Successfully created cart and added item: " + newItem.getItemId());
+                                taskCompletionSource.setResult(aVoid);
+                            })
+                            .addOnFailureListener(e -> {
+                                Log.e("CartDebug", "Failed to create cart/add item: " + e.getMessage());
+                                taskCompletionSource.setException(e);
+                            });
+                } else {
+                    Log.d("CartDebug", "User cart exists. Checking item: " + newItem.getItemId());
+                    cartItemRef.addListenerForSingleValueEvent(new ValueEventListener() {
+                        @Override
+                        public void onDataChange(@NonNull DataSnapshot snapshot) {
+                            if (snapshot.exists()) {
+                                Log.d("CartDebug",
+                                        "Item already exists in cart. Increasing quantity: " + newItem.getItemId());
+                                CartItemModel existingItem = snapshot.getValue(CartItemModel.class);
+                                if (existingItem != null) {
+                                    int updatedQuantity = existingItem.getQuantity() + 1;
+                                    existingItem.setQuantity(updatedQuantity);
+                                    cartItemRef.setValue(existingItem)
+                                            .addOnSuccessListener(aVoid -> {
+                                                Log.d("CartDebug", "Successfully updated quantity for item: "
+                                                        + newItem.getItemId());
+                                                taskCompletionSource.setResult(aVoid);
+                                            })
+                                            .addOnFailureListener(e -> {
+                                                Log.e("CartDebug", "Failed to update quantity: " + e.getMessage());
+                                                taskCompletionSource.setException(e);
+                                            });
+                                } else {
+                                    Log.e("CartDebug",
+                                            "Existing item is null, overwriting with new item: " + newItem.getItemId());
+                                    cartItemRef.setValue(newItem)
+                                            .addOnSuccessListener(aVoid -> {
+                                                Log.d("CartDebug",
+                                                        "Successfully overwrote null item: " + newItem.getItemId());
+                                                taskCompletionSource.setResult(aVoid);
+                                            })
+                                            .addOnFailureListener(e -> {
+                                                Log.e("CartDebug", "Failed to overwrite null item: " + e.getMessage());
+                                                taskCompletionSource.setException(e);
+                                            });
+                                }
+                            } else {
+                                Log.d("CartDebug",
+                                        "Item does not exist in cart. Adding new item: " + newItem.getItemId());
+                                cartItemRef.setValue(newItem)
+                                        .addOnSuccessListener(aVoid -> {
+                                            Log.d("CartDebug", "Successfully added new item: " + newItem.getItemId());
+                                            taskCompletionSource.setResult(aVoid);
+                                        })
+                                        .addOnFailureListener(e -> {
+                                            Log.e("CartDebug", "Failed to add new item: " + e.getMessage());
+                                            taskCompletionSource.setException(e);
+                                        });
+                            }
+                        }
+
+                        @Override
+                        public void onCancelled(@NonNull DatabaseError error) {
+                            Log.e("CartDebug", "Error checking item in cart: " + error.getMessage());
+                            taskCompletionSource.setException(error.toException());
+                        }
+                    });
                 }
             }
 
             @Override
             public void onCancelled(@NonNull DatabaseError error) {
+                Log.e("CartDebug", "Error checking user cart: " + error.getMessage());
                 taskCompletionSource.setException(error.toException());
             }
         });
@@ -285,6 +335,12 @@ public class MainRepository {
     public Task<Void> deleteFromCart(String userId, String itemId) {
         DatabaseReference cartRef = firebaseDatabase.getReference("Cart").child(userId).child(itemId);
         return cartRef.removeValue();
+    }
+
+    // Tạo giỏ hàng rỗng cho user nếu chưa có
+    public void createEmptyCartForUser(String userId) {
+        DatabaseReference cartRef = firebaseDatabase.getReference("Cart").child(userId);
+        cartRef.setValue(new ArrayList<CartItemModel>());
     }
 
     // load cart with user id
