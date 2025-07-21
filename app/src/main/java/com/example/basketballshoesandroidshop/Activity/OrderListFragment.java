@@ -163,7 +163,7 @@ public class OrderListFragment extends Fragment {
                                 // 4. Kiểm tra xem đã xử lý xong tất cả các đơn hàng chưa
                                 if (ordersProcessed.incrementAndGet() == totalOrders) {
                                     Collections.sort(orderList, (o1, o2) -> {
-                                       
+
                                         return o2.getOrderDate().compareTo(o1.getOrderDate());
                                     });
                                     progressBar.setVisibility(View.GONE);
