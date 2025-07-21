@@ -81,7 +81,7 @@ public class RatingDialogFragment extends DialogFragment {
         // 1. Khởi tạo SessionManager
         SessionManager sessionManager = new SessionManager(getContext());
         // 2. Lấy userId từ session
-        String userId = sessionManager.getCurrentUserId();
+        String userId = sessionManager.getUserFromSession().getEmail();
 
 
         // Lấy userId, tạm thời hardcode

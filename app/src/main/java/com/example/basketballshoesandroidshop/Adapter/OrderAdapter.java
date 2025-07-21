@@ -98,10 +98,10 @@ public class OrderAdapter extends RecyclerView.Adapter<OrderAdapter.OrderViewHol
         }
 
         holder.itemView.setOnClickListener(v -> {
-            // Lấy orderId của đơn hàng được click
+
             String orderId = order.getOrderId();
             SessionManager sessionManager = new SessionManager(context);
-            // Lấy userId (tạm thời hardcode, bạn nên truyền userId thực tế vào adapter)
+
             String userId = sessionManager.getCurrentUserId();
 
             // Tạo Intent để mở OrderDetailActivity

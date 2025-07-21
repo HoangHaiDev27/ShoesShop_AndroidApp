@@ -27,7 +27,7 @@ public class OrderHistoryActivity extends AppCompatActivity {
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         getSupportActionBar().setDisplayShowHomeEnabled(true);
         SessionManager sessionManager = new SessionManager(this);
-        String currentUserId = "user_001";
+        String currentUserId = sessionManager.getUserFromSession().getUserId();
 
         ViewPager2 viewPager = findViewById(R.id.viewPager);
         TabLayout tabLayout = findViewById(R.id.tabLayout);
