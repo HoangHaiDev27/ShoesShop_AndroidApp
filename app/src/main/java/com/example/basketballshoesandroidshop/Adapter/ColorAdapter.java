@@ -34,13 +34,13 @@ public class ColorAdapter extends RecyclerView.Adapter<ColorAdapter.Viewholder> 
     @Override
     public ColorAdapter.Viewholder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
         context = parent.getContext();
-        ViewholderColorBinding binding = ViewholderColorBinding.inflate(LayoutInflater.from(context),parent,false);
+        ViewholderColorBinding binding = ViewholderColorBinding.inflate(LayoutInflater.from(context), parent, false);
 
         return new Viewholder(binding);
     }
 
     @Override
-    public void onBindViewHolder(@NonNull ColorAdapter.Viewholder holder,@SuppressLint("RecyclerView") int position) {
+    public void onBindViewHolder(@NonNull ColorAdapter.Viewholder holder, @SuppressLint("RecyclerView") int position) {
         holder.binding.getRoot().setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -65,7 +65,18 @@ public class ColorAdapter extends RecyclerView.Adapter<ColorAdapter.Viewholder> 
             Drawable wrappedDrawable = DrawableCompat.wrap(unwrappedDrawable);
 
             // Apply dynamic color based on the item
-            DrawableCompat.setTint(wrappedDrawable, Color.parseColor(items.get(position)));
+            String colorString = items.get(position);
+            int colorInt;
+            if (colorString == null || colorString.isEmpty()) {
+                colorInt = Color.GRAY; // fallback nếu màu rỗng
+            } else {
+                try {
+                    colorInt = Color.parseColor(colorString);
+                } catch (IllegalArgumentException e) {
+                    colorInt = Color.GRAY; // fallback nếu màu không hợp lệ
+                }
+            }
+            DrawableCompat.setTint(wrappedDrawable, colorInt);
 
             Glide.with(context)
                     .load(wrappedDrawable)
@@ -79,8 +90,9 @@ public class ColorAdapter extends RecyclerView.Adapter<ColorAdapter.Viewholder> 
         return items.size();
     }
 
-    public class Viewholder extends RecyclerView.ViewHolder{
+    public class Viewholder extends RecyclerView.ViewHolder {
         ViewholderColorBinding binding;
+
         public Viewholder(ViewholderColorBinding binding) {
             super(binding.getRoot());
             this.binding = binding;

@@ -20,6 +20,8 @@ import com.example.basketballshoesandroidshop.Domain.ItemsModel;
 import com.example.basketballshoesandroidshop.Helper.ManagmentCart;
 import com.example.basketballshoesandroidshop.Models.CreateOrder;
 import com.example.basketballshoesandroidshop.R;
+import com.example.basketballshoesandroidshop.Utils.SessionManager;
+import com.example.basketballshoesandroidshop.Domain.User;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ServerValue;
@@ -48,11 +50,29 @@ public class OrderPayment extends AppCompatActivity {
         Button btnThanhToan;
         Button btnLienHe;
 
+        SessionManager sessionManager;
+        User currentUser;
+        String userId;
+        String shippingAddress;
+
         @Override
         protected void onCreate(Bundle savedInstanceState) {
                 super.onCreate(savedInstanceState);
                 EdgeToEdge.enable(this);
                 setContentView(R.layout.activity_order_payment);
+
+                sessionManager = new SessionManager(this);
+                currentUser = sessionManager.getUserFromSession();
+                if (currentUser != null && currentUser.getUserId() != null) {
+                        userId = currentUser.getUserId();
+                        shippingAddress = currentUser.getAddress();
+                        if (shippingAddress == null || shippingAddress.isEmpty()) {
+                                shippingAddress = "456 Đường DEF, Quận UVW, Hà Nội";
+                        }
+                } else {
+                        userId = "user_001";
+                        shippingAddress = "456 Đường DEF, Quận UVW, Hà Nội";
+                }
 
                 txtTotal = findViewById(R.id.txtTotalMoney);
                 btnThanhToan = findViewById(R.id.btnThanhToan);
@@ -99,10 +119,6 @@ public class OrderPayment extends AppCompatActivity {
                                                                                 DatabaseReference database = FirebaseDatabase
                                                                                                 .getInstance()
                                                                                                 .getReference();
-                                                                                String userId = "user_001"; // hoặc lấy
-                                                                                                            // từ user
-                                                                                                            // đã login
-                                                                                String shippingAddress = "456 Đường DEF, Quận UVW, Hà Nội";
                                                                                 String paymentMethod = "ZaloPay";
 
                                                                                 // Lấy giỏ hàng trực tiếp từ Firebase
