@@ -1,5 +1,7 @@
 package com.example.basketballshoesandroidshop.Activity;
 
+import android.content.Context;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -193,5 +195,69 @@ public class OrderListFragment extends Fragment {
                 Toast.makeText(getContext(), "Lỗi tải danh sách đơn hàng.", Toast.LENGTH_SHORT).show();
             }
         });
+    }
+
+    /**
+     * Xử lý kết quả trả về từ Repository
+     */
+    private void handleOrdersResult(ArrayList<OrderModel> orders) {
+        progressBar.setVisibility(View.GONE);
+
+        if (orders != null && !orders.isEmpty()) {
+            orderList.clear();
+            orderList.addAll(orders);
+            adapter.notifyDataSetChanged();
+            textViewNoOrders.setVisibility(View.GONE);
+
+            Log.d("OrderListFragment", "Loaded " + orders.size() + " orders for status: " + orderStatus);
+        } else {
+            orderList.clear();
+            adapter.notifyDataSetChanged();
+            textViewNoOrders.setVisibility(View.VISIBLE);
+
+            Log.d("OrderListFragment", "No orders found for status: " + orderStatus);
+        }
+    }
+
+    /**
+     * Lấy User ID hiện tại từ SharedPreferences
+     */
+    private String getCurrentUserId() {
+        if (getActivity() == null) {
+            return "user_001"; // Fallback
+        }
+
+        SharedPreferences prefs = getActivity().getSharedPreferences("user_prefs", Context.MODE_PRIVATE);
+        String userId = prefs.getString("user_id", "user_001");
+
+        Log.d("OrderListFragment", "Current User ID: " + userId);
+        return userId;
+    }
+
+    /**
+     * Refresh dữ liệu đơn hàng
+     */
+    public void refreshOrders() {
+        if (orderList != null) {
+            orderList.clear();
+            adapter.notifyDataSetChanged();
+        }
+        fetchOrders();
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        // Refresh dữ liệu khi fragment resume (có thể có đơn hàng mới)
+        refreshOrders();
+    }
+
+    @Override
+    public void onDestroyView() {
+        super.onDestroyView();
+        // Cleanup
+        if (recyclerView != null) {
+            recyclerView.setAdapter(null);
+        }
     }
 }

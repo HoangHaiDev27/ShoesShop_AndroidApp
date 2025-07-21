@@ -1,0 +1,130 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:paddingHorizontal="8dp"
+    android:paddingVertical="4dp">
+
+    <!-- User message layout (bên phải) -->
+    <LinearLayout
+        android:id="@+id/userMessageLayout"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="end"
+        android:visibility="gone">
+
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="60dp"
+            android:orientation="vertical">
+
+            <TextView
+                android:id="@+id/userMessageText"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:background="@drawable/message_bubble_user"
+                android:padding="12dp"
+                android:text="User message here"
+                android:textColor="@color/white"
+                android:textSize="16sp"
+                android:maxWidth="280dp" />
+
+            <TextView
+                android:id="@+id/userMessageTime"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="end"
+                android:layout_marginTop="4dp"
+                android:layout_marginEnd="8dp"
+                android:text="12:34"
+                android:textColor="@color/gray"
+                android:textSize="12sp" />
+
+        </LinearLayout>
+
+    </LinearLayout>
+
+    <!-- Bot message layout (bên trái) -->
+    <LinearLayout
+        android:id="@+id/botMessageLayout"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="start"
+        android:visibility="gone">
+
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginEnd="60dp"
+            android:orientation="horizontal">
+
+            <!-- Bot avatar -->
+            <ImageView
+                android:id="@+id/botMessageAvatar"
+                android:layout_width="32dp"
+                android:layout_height="32dp"
+                android:layout_marginEnd="8dp"
+                android:layout_gravity="bottom"
+                android:background="@drawable/circle_orange_bg"
+                android:src="@drawable/ic_chat"
+                android:padding="6dp"
+                android:contentDescription="Bot avatar"
+                app:tint="@color/white"
+                xmlns:app="http://schemas.android.com/apk/res-auto" />
+
+            <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:orientation="vertical">
+
+                <TextView
+                    android:id="@+id/botMessageText"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:background="@drawable/message_bubble_bot"
+                    android:padding="12dp"
+                    android:text="Bot message here"
+                    android:textColor="@color/black"
+                    android:textSize="16sp"
+                    android:maxWidth="280dp" />
+
+                <TextView
+                    android:id="@+id/botMessageTime"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="4dp"
+                    android:layout_marginStart="8dp"
+                    android:text="12:34"
+                    android:textColor="@color/gray"
+                    android:textSize="12sp" />
+
+            </LinearLayout>
+
+        </LinearLayout>
+
+    </LinearLayout>
+
+    <!-- System message layout (giữa) -->
+    <LinearLayout
+        android:id="@+id/systemMessageLayout"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center"
+        android:visibility="gone">
+
+        <TextView
+            android:id="@+id/systemMessageText"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:background="@drawable/system_message_bg"
+            android:padding="8dp"
+            android:text="System message"
+            android:textColor="@color/gray_dark"
+            android:textSize="14sp"
+            android:gravity="center" />
+
+    </LinearLayout>
+
+</LinearLayout>

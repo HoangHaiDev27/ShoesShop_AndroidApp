@@ -24,9 +24,11 @@ import com.example.basketballshoesandroidshop.R;
 import com.example.basketballshoesandroidshop.Utils.SessionManager;
 import com.example.basketballshoesandroidshop.ViewModel.MainViewModel;
 import com.example.basketballshoesandroidshop.databinding.ActivityMainBinding;
+import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.ismaeldivita.chipnavigation.ChipNavigationBar;
 
 import java.util.ArrayList;
+
 
 public class MainActivity extends AppCompatActivity {
     private ActivityMainBinding binding;
@@ -48,7 +50,8 @@ public class MainActivity extends AppCompatActivity {
         binding = ActivityMainBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
         viewModel = new MainViewModel();
-
+        FloatingActionButton fabChat = findViewById(R.id.fabChat);
+        fabChat.setOnClickListener(v -> openChatbot());
         // Initialize session manager
         sessionManager = new SessionManager(this);
         userId = sessionManager.getCurrentUserId();
@@ -226,5 +229,10 @@ public class MainActivity extends AppCompatActivity {
             binding.categoryView.setNestedScrollingEnabled(true);
             binding.progressBarCategory.setVisibility(View.GONE);
         });
+    }
+
+    private void openChatbot() {
+        Intent intent = new Intent(this, ChatActivity.class);
+        startActivity(intent);
     }
 }
