@@ -19,13 +19,23 @@ public class WishlistActivity extends AppCompatActivity {
     private ActivityWishlistBinding binding;
     private WishlistViewModel viewModel;
     private WishlistAdapter adapter;
-    private String currentUserId = "user_001"; // Tạm thời hardcode, sau này sẽ lấy từ session
+    // private String currentUserId = "user_001"; // Tạm thời hardcode, sau này sẽ lấy từ session
+    private String currentUserId;
     
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         binding = ActivityWishlistBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
+        
+        // Lấy userId từ session
+        com.example.basketballshoesandroidshop.Utils.SessionManager sessionManager = new com.example.basketballshoesandroidshop.Utils.SessionManager(this);
+        currentUserId = sessionManager.getCurrentUserId();
+        if (currentUserId == null || currentUserId.isEmpty()) {
+            Toast.makeText(this, "Bạn chưa đăng nhập!", Toast.LENGTH_SHORT).show();
+            finish();
+            return;
+        }
         
         viewModel = new WishlistViewModel();
         

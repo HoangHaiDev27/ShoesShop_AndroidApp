@@ -32,13 +32,14 @@ public class CatalogAdapter extends ArrayAdapter<ItemsModel> {
     private static final String TAG = "CatalogAdapter";
     private List<ItemsModel> dataList;
     private WishlistViewModel wishlistViewModel;
-    private String currentUserId = "user_001"; // Tạm thời hardcode
+    private String currentUserId;
     private WishlistCache wishlistCache;
 
-    public CatalogAdapter(@NonNull Context context, int resource, @NonNull List<ItemsModel> objects) {
+    public CatalogAdapter(@NonNull Context context, int resource, @NonNull List<ItemsModel> objects, String userId) {
         super(context, resource, objects);
         this.context = context;
         this.dataList = objects;
+        this.currentUserId = userId;
         this.wishlistViewModel = new WishlistViewModel();
         this.wishlistCache = WishlistCache.getInstance();
     }
