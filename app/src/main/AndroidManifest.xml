@@ -98,6 +98,9 @@
         <activity
             android:name=".Utils.Filter"
             android:exported="false"/>
+        <activity
+            android:name=".Activity.ChatActivity"
+            android:exported="false" />
         <meta-data
             android:name="com.google.android.geo.API_KEY"
             android:value="@string/map_api" />

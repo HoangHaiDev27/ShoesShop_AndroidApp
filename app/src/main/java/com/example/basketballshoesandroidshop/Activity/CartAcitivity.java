@@ -24,6 +24,8 @@ import com.example.basketballshoesandroidshop.Helper.ManagmentCart;
 import com.example.basketballshoesandroidshop.R;
 import com.example.basketballshoesandroidshop.Repository.MainRepository;
 import com.example.basketballshoesandroidshop.databinding.ActivityCartAcitivityBinding;
+import com.example.basketballshoesandroidshop.Utils.SessionManager;
+import com.example.basketballshoesandroidshop.Domain.User;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -34,10 +36,10 @@ public class CartAcitivity extends AppCompatActivity {
     private double tax;
     private ManagmentCart managementCart;
     private MainRepository repository;
-    Button  btnCheckout;
+    Button btnCheckout;
     TextView total;
     String userId;
-
+    private SessionManager sessionManager;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -48,7 +50,14 @@ public class CartAcitivity extends AppCompatActivity {
 
         managementCart = new ManagmentCart(this);
         repository = new MainRepository();
-        userId = "user_001";
+        sessionManager = new SessionManager(this);
+        User currentUser = sessionManager.getUserFromSession();
+        if (currentUser != null && currentUser.getUserId() != null) {
+            userId = currentUser.getUserId();
+        } else {
+            // fallback nếu không có session, có thể chuyển về Login hoặc dùng id mặc định
+            userId = "user_001";
+        }
         CalculatorCart();
         SetVariable();
         initCartList();
@@ -57,15 +66,15 @@ public class CartAcitivity extends AppCompatActivity {
         btnCheckout.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if(total ==  null ||total.getText().toString().isEmpty()){
-                    Toast.makeText(CartAcitivity.this,"Không có sản phẩm nào trong giỏ",Toast.LENGTH_SHORT).show();
+                if (total == null || total.getText().toString().isEmpty()) {
+                    Toast.makeText(CartAcitivity.this, "Không có sản phẩm nào trong giỏ", Toast.LENGTH_SHORT).show();
                     return;
                 }
 
                 String totalString = total.getText().toString().replaceAll("[^\\d.]", "");
                 double totalDouble = Double.parseDouble(totalString);
                 Intent intent = new Intent(CartAcitivity.this, OrderPayment.class);
-                intent.putExtra("total",totalDouble);
+                intent.putExtra("total", totalDouble);
                 startActivity(intent);
             }
         });
@@ -125,11 +134,8 @@ public class CartAcitivity extends AppCompatActivity {
         });
     }
 
-
-
-
     private void SetVariable() {
-        biding.backBtn.setOnClickListener(v->finish());
+        biding.backBtn.setOnClickListener(v -> finish());
     }
 
     private void CalculatorCart() {
@@ -138,7 +144,8 @@ public class CartAcitivity extends AppCompatActivity {
 
         // Lấy tổng giá từ Firebase
         repository.getCartTotal(userId).observe(this, itemTotal -> {
-            if (itemTotal == null) itemTotal = 0.0;
+            if (itemTotal == null)
+                itemTotal = 0.0;
 
             double tax = itemTotal * percentTax;
             double total = Math.round((itemTotal + delivery + tax) * 100.0) / 100.0;
@@ -148,6 +155,28 @@ public class CartAcitivity extends AppCompatActivity {
             biding.deliveryTxt.setText("$" + String.format("%.2f", delivery));
             biding.totalTxt.setText("$" + String.format("%.2f", total));
         });
+    }
+
+    private void checkRebuyMode() {
+        boolean fromRebuy = getIntent().getBooleanExtra("FROM_REBUY", false);
+
+        if (fromRebuy) {
+            String rebuyOrderId = getIntent().getStringExtra("REBUY_ORDER_ID");
+            int itemsCount = getIntent().getIntExtra("REBUY_ITEMS_COUNT", 0);
+
+            // Show rebuy notification
+            showRebuyNotification(rebuyOrderId, itemsCount);
+        }
+    }
+
+    private void showRebuyNotification(String orderId, int itemsCount) {
+        // Update toolbar title nếu có
+        if (getSupportActionBar() != null) {
+            getSupportActionBar().setTitle("🔄 Giỏ hàng (Mua lại #" + orderId + ")");
+        }
+
+        // Optional: Show additional info
+        // Toast.makeText(this, "📦 Đơn hàng mua lại từ #" + orderId, Toast.LENGTH_SHORT).show();
     }
 
 }

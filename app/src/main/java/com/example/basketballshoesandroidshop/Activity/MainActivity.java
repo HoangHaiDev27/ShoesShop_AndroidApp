@@ -25,9 +25,11 @@ import com.example.basketballshoesandroidshop.R;
 import com.example.basketballshoesandroidshop.Utils.SessionManager;
 import com.example.basketballshoesandroidshop.ViewModel.MainViewModel;
 import com.example.basketballshoesandroidshop.databinding.ActivityMainBinding;
+import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.ismaeldivita.chipnavigation.ChipNavigationBar;
 
 import java.util.ArrayList;
+
 
 public class MainActivity extends AppCompatActivity {
     private ActivityMainBinding binding;
@@ -41,6 +43,8 @@ public class MainActivity extends AppCompatActivity {
     private TextView tvWelcomeBack, tvUserName;
     private LinearLayout llUserProfile;
     private ImageView ivMainUserAvatar;
+    String userId;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -49,9 +53,11 @@ public class MainActivity extends AppCompatActivity {
         binding = ActivityMainBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
         viewModel = new MainViewModel();
-
+        FloatingActionButton fabChat = findViewById(R.id.fabChat);
+        fabChat.setOnClickListener(v -> openChatbot());
         // Initialize session manager
         sessionManager = new SessionManager(this);
+        userId = sessionManager.getCurrentUserId();
 
         // Check if user is logged in
         if (!sessionManager.isLoggedIn()) {
@@ -194,7 +200,7 @@ public class MainActivity extends AppCompatActivity {
                 binding.popularView.setLayoutManager(
                         new LinearLayoutManager(MainActivity.this,LinearLayoutManager.HORIZONTAL,false)
                 );
-                popularAdapter = new PopularAdapter(itemsModels);
+                popularAdapter = new PopularAdapter(itemsModels, userId);
                 binding.popularView.setAdapter(popularAdapter);
                 binding.popularView.setNestedScrollingEnabled(true);
             }
@@ -238,5 +244,10 @@ public class MainActivity extends AppCompatActivity {
             binding.categoryView.setNestedScrollingEnabled(true);
             binding.progressBarCategory.setVisibility(View.GONE);
         });
+    }
+
+    private void openChatbot() {
+        Intent intent = new Intent(this, ChatActivity.class);
+        startActivity(intent);
     }
 }

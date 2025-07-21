@@ -9,6 +9,7 @@ import android.widget.EditText;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
+import android.util.Log;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
@@ -22,6 +23,7 @@ import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
+import com.example.basketballshoesandroidshop.Repository.MainRepository;
 
 public class LoginActivity extends AppCompatActivity {
 
@@ -33,6 +35,7 @@ public class LoginActivity extends AppCompatActivity {
 
     private DatabaseReference databaseReference;
     private SessionManager sessionManager;
+    private MainRepository repository;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -42,6 +45,7 @@ public class LoginActivity extends AppCompatActivity {
         // Khởi tạo Firebase và Session
         databaseReference = FirebaseDatabase.getInstance().getReference("Users");
         sessionManager = new SessionManager(this);
+        repository = new MainRepository();
 
         // Kiểm tra đã đăng nhập chưa
         if (sessionManager.isLoggedIn()) {
@@ -147,7 +151,8 @@ public class LoginActivity extends AppCompatActivity {
                                     } else {
                                         // Sai password
                                         etPassword.setError("Mật khẩu không chính xác");
-                                        Toast.makeText(LoginActivity.this, "Mật khẩu không chính xác!", Toast.LENGTH_SHORT).show();
+                                        Toast.makeText(LoginActivity.this, "Mật khẩu không chính xác!",
+                                                Toast.LENGTH_SHORT).show();
                                         return;
                                     }
                                 }
@@ -162,19 +167,36 @@ public class LoginActivity extends AppCompatActivity {
                     @Override
                     public void onCancelled(@NonNull DatabaseError error) {
                         showLoading(false);
-                        Toast.makeText(LoginActivity.this, "Lỗi kết nối: " + error.getMessage(), Toast.LENGTH_SHORT).show();
+                        Toast.makeText(LoginActivity.this, "Lỗi kết nối: " + error.getMessage(), Toast.LENGTH_SHORT)
+                                .show();
                     }
                 });
     }
 
     private void loginSuccess(User user) {
-        // Tạo session
         boolean rememberMe = cbRememberMe.isChecked();
         sessionManager.createLoginSession(user, rememberMe);
 
-        Toast.makeText(this, "Đăng nhập thành công! Chào mừng " + user.getName(), Toast.LENGTH_SHORT).show();
+        Log.d("CartDebug", "loginSuccess called for user: " + (user != null ? user.getUserId() : "null user"));
 
-        // Chuyển đến MainActivity
+        if (user == null || user.getUserId() == null) {
+            Log.e("CartDebug", "User or userId is null in loginSuccess!");
+            Toast.makeText(this, "Lỗi userId!", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        Log.d("CartDebug", "Checking cart for user: " + user.getUserId());
+        repository.getCartWithUserId(user.getUserId()).observe(this, cartList -> {
+            Log.d("CartDebug", "Observer triggered for user: " + user.getUserId());
+            if (cartList == null) {
+                Log.d("CartDebug", "Cart is null for user: " + user.getUserId() + ". Creating empty cart.");
+                repository.createEmptyCartForUser(user.getUserId());
+            } else {
+                Log.d("CartDebug", "Cart exists for user: " + user.getUserId() + ", size: " + cartList.size());
+            }
+        });
+
+        Toast.makeText(this, "Đăng nhập thành công! Chào mừng " + user.getName(), Toast.LENGTH_SHORT).show();
         goToMainActivity();
     }
 

@@ -1,5 +1,7 @@
 package com.example.basketballshoesandroidshop.Activity;
 
+import android.content.Context;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -19,6 +21,7 @@ import com.example.basketballshoesandroidshop.Adapter.OrderAdapter;
 import com.example.basketballshoesandroidshop.Domain.OrderItemModel;
 import com.example.basketballshoesandroidshop.Domain.OrderModel;
 import com.example.basketballshoesandroidshop.R;
+import com.example.basketballshoesandroidshop.Utils.SessionManager;
 import com.google.firebase.FirebaseApp;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
@@ -30,13 +33,17 @@ import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 
 public class OrderListFragment extends Fragment {
 
     private static final String ARG_STATUS = "status";
+    private static final String ARG_USER_ID = "userId";
     private String orderStatus;
+
+    private String currentUserId;
 
     private RecyclerView recyclerView;
     private OrderAdapter adapter;
@@ -51,10 +58,11 @@ public class OrderListFragment extends Fragment {
         // Required empty public constructor
     }
 
-    public static OrderListFragment newInstance(String status) {
+    public static OrderListFragment newInstance(String status, String userId) {
         OrderListFragment fragment = new OrderListFragment();
         Bundle args = new Bundle();
         args.putString(ARG_STATUS, status);
+        args.putString(ARG_USER_ID, userId);
         fragment.setArguments(args);
         return fragment;
     }
@@ -64,6 +72,7 @@ public class OrderListFragment extends Fragment {
         super.onCreate(savedInstanceState);
         if (getArguments() != null) {
             orderStatus = getArguments().getString(ARG_STATUS);
+            currentUserId = getArguments().getString(ARG_USER_ID);
         }
         // Lấy reference đến gốc của Realtime Database
         databaseReference = FirebaseDatabase.getInstance().getReference();
@@ -101,7 +110,16 @@ public class OrderListFragment extends Fragment {
         progressBar.setVisibility(View.VISIBLE);
         textViewNoOrders.setVisibility(View.GONE);
 
-        String currentUserId = "user_001";
+
+
+        if (currentUserId == null) {
+            // Nếu chưa đăng nhập, không thực hiện truy vấn
+            progressBar.setVisibility(View.GONE);
+            textViewNoOrders.setText("Vui lòng đăng nhập để xem đơn hàng.");
+            textViewNoOrders.setVisibility(View.VISIBLE);
+            Log.d("FetchOrders", "User chưa đăng nhập.");
+            return;
+        }
 
         Query query = databaseReference.child("Orders").child(currentUserId)
                 .orderByChild("orderStatus")
@@ -146,7 +164,10 @@ public class OrderListFragment extends Fragment {
 
                                 // 4. Kiểm tra xem đã xử lý xong tất cả các đơn hàng chưa
                                 if (ordersProcessed.incrementAndGet() == totalOrders) {
-                                    // Chỉ cập nhật adapter và UI sau khi đã lấy đủ dữ liệu cho TẤT CẢ đơn hàng
+                                    Collections.sort(orderList, (o1, o2) -> {
+
+                                        return o2.getOrderDate().compareTo(o1.getOrderDate());
+                                    });
                                     progressBar.setVisibility(View.GONE);
                                     adapter.notifyDataSetChanged();
                                     if(orderList.isEmpty()){
@@ -174,5 +195,69 @@ public class OrderListFragment extends Fragment {
                 Toast.makeText(getContext(), "Lỗi tải danh sách đơn hàng.", Toast.LENGTH_SHORT).show();
             }
         });
+    }
+
+    /**
+     * Xử lý kết quả trả về từ Repository
+     */
+    private void handleOrdersResult(ArrayList<OrderModel> orders) {
+        progressBar.setVisibility(View.GONE);
+
+        if (orders != null && !orders.isEmpty()) {
+            orderList.clear();
+            orderList.addAll(orders);
+            adapter.notifyDataSetChanged();
+            textViewNoOrders.setVisibility(View.GONE);
+
+            Log.d("OrderListFragment", "Loaded " + orders.size() + " orders for status: " + orderStatus);
+        } else {
+            orderList.clear();
+            adapter.notifyDataSetChanged();
+            textViewNoOrders.setVisibility(View.VISIBLE);
+
+            Log.d("OrderListFragment", "No orders found for status: " + orderStatus);
+        }
+    }
+
+    /**
+     * Lấy User ID hiện tại từ SharedPreferences
+     */
+    private String getCurrentUserId() {
+        if (getActivity() == null) {
+            return "user_001"; // Fallback
+        }
+
+        SharedPreferences prefs = getActivity().getSharedPreferences("user_prefs", Context.MODE_PRIVATE);
+        String userId = prefs.getString("user_id", "user_001");
+
+        Log.d("OrderListFragment", "Current User ID: " + userId);
+        return userId;
+    }
+
+    /**
+     * Refresh dữ liệu đơn hàng
+     */
+    public void refreshOrders() {
+        if (orderList != null) {
+            orderList.clear();
+            adapter.notifyDataSetChanged();
+        }
+        fetchOrders();
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        // Refresh dữ liệu khi fragment resume (có thể có đơn hàng mới)
+        refreshOrders();
+    }
+
+    @Override
+    public void onDestroyView() {
+        super.onDestroyView();
+        // Cleanup
+        if (recyclerView != null) {
+            recyclerView.setAdapter(null);
+        }
     }
 }

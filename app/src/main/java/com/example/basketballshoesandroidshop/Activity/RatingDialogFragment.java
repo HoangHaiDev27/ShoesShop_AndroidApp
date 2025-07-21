@@ -1,6 +1,7 @@
 package com.example.basketballshoesandroidshop.Activity;
 
 import android.os.Bundle;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -15,6 +16,7 @@ import androidx.fragment.app.DialogFragment;
 
 import com.example.basketballshoesandroidshop.Domain.FeedbackModel;
 import com.example.basketballshoesandroidshop.R;
+import com.example.basketballshoesandroidshop.Utils.SessionManager;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 
@@ -76,9 +78,14 @@ public class RatingDialogFragment extends DialogFragment {
 
         // Tạo một ID duy nhất cho feedback
         String feedbackId = feedbackRef.push().getKey();
+        // 1. Khởi tạo SessionManager
+        SessionManager sessionManager = new SessionManager(getContext());
+        // 2. Lấy userId từ session
+        String userId = sessionManager.getUserFromSession().getEmail();
+
 
         // Lấy userId, tạm thời hardcode
-        String userId = "user_001";
+
         long createdAt = System.currentTimeMillis();
 
         FeedbackModel feedback = new FeedbackModel(userId, itemId, orderId, rating, comment, createdAt);

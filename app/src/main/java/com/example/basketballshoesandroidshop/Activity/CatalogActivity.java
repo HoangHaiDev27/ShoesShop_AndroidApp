@@ -40,6 +40,7 @@ public class CatalogActivity extends AppCompatActivity {
     // Filter-related fields
     private double minPrice = 0;
     private double maxPrice = 100;
+    String userId = "user_001";
     private List<VariationModel> selectedColors = new ArrayList<>();
     private ActivityResultLauncher<Intent> filterLauncher;
 
@@ -52,6 +53,9 @@ public class CatalogActivity extends AppCompatActivity {
         Intent intent = getIntent();
         categoryId = intent.getIntExtra("categoryId", 1);
         categoryName = intent.getStringExtra("categoryName");
+
+        com.example.basketballshoesandroidshop.Utils.SessionManager sessionManager = new com.example.basketballshoesandroidshop.Utils.SessionManager(this);
+        userId = sessionManager.getCurrentUserId();
 
         setupFilterLauncher();
         init();
@@ -103,7 +107,7 @@ public class CatalogActivity extends AppCompatActivity {
                 }
             }
 
-            adapter = new CatalogAdapter(this, filteredProducts.size(), filteredProducts);
+            adapter = new CatalogAdapter(this, filteredProducts.size(), filteredProducts, userId);
             Log.e(TAG, "filterProducts: " + filteredProducts.size());
             gridView.setAdapter(adapter);
         }
@@ -116,7 +120,7 @@ public class CatalogActivity extends AppCompatActivity {
             for (ItemsModel product : productModels) {
                 dataList.add(product);
             }
-            adapter = new CatalogAdapter(this, dataList.size(), dataList);
+            adapter = new CatalogAdapter(this, dataList.size(), dataList, userId);
             Log.e(TAG, "loadData123: " + dataList.size());
             gridView.setAdapter(adapter);
         });
@@ -206,7 +210,7 @@ public class CatalogActivity extends AppCompatActivity {
                 dataList.add(product);
             }
             
-            adapter = new CatalogAdapter(this, dataList.size(), dataList);
+            adapter = new CatalogAdapter(this, dataList.size(), dataList, userId);
             Log.e(TAG, "applyFilters: " + dataList.size() + " items found");
             gridView.setAdapter(adapter);
         });

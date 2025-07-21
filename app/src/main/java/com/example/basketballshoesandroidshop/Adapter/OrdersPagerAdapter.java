@@ -11,16 +11,19 @@ public class OrdersPagerAdapter extends FragmentStateAdapter {
 
     private final String[] titles;
 
-    public OrdersPagerAdapter(@NonNull FragmentActivity fragmentActivity, String[] titles) {
+    private final String userId;
+
+    public OrdersPagerAdapter(@NonNull FragmentActivity fragmentActivity, String[] titles, String userId) {
         super(fragmentActivity);
         this.titles = titles;
+        this.userId = userId; // Lưu lại userId
     }
 
     @NonNull
     @Override
     public Fragment createFragment(int position) {
         // Gửi trạng thái tương ứng cho mỗi fragment
-        return OrderListFragment.newInstance(titles[position]);
+        return OrderListFragment.newInstance(titles[position], userId);
     }
 
     @Override

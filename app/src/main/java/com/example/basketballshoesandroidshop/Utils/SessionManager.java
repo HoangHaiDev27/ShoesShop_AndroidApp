@@ -4,6 +4,7 @@ import android.content.Context;
 import android.content.SharedPreferences;
 
 import com.example.basketballshoesandroidshop.Domain.User;
+import com.example.basketballshoesandroidshop.Utils.WishlistCache;
 
 public class SessionManager {
     private static final String PREF_NAME = "UserSession";
@@ -72,6 +73,8 @@ public class SessionManager {
     public void logout() {
         editor.clear();
         editor.commit();
+        // Clear wishlist cache khi logout
+        WishlistCache.getInstance().clear();
     }
 
     // Logout nhưng giữ Remember Me
@@ -85,5 +88,7 @@ public class SessionManager {
             editor.putBoolean(KEY_REMEMBER_ME, true);
         }
         editor.commit();
+        // Clear wishlist cache khi logout
+        WishlistCache.getInstance().clear();
     }
 }

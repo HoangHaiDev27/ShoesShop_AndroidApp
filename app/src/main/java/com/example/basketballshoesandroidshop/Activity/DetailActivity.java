@@ -23,6 +23,8 @@ import com.example.basketballshoesandroidshop.R;
 import com.example.basketballshoesandroidshop.Repository.MainRepository;
 import com.example.basketballshoesandroidshop.databinding.ActivityDetailBinding;
 import com.example.basketballshoesandroidshop.databinding.ActivityMainBinding;
+import com.example.basketballshoesandroidshop.Utils.SessionManager;
+import com.example.basketballshoesandroidshop.Domain.User;
 
 import java.util.ArrayList;
 
@@ -32,6 +34,7 @@ public class DetailActivity extends AppCompatActivity {
     private int numberOrder = 1;
     private ManagmentCart managmentCart;
     private MainRepository repository;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -49,24 +52,28 @@ public class DetailActivity extends AppCompatActivity {
 
     private void initColor() {
         binding.RecyclerColor.setAdapter(new ColorAdapter(object.getColor()));
-        binding.RecyclerColor.setLayoutManager(new LinearLayoutManager(this,LinearLayoutManager.HORIZONTAL,false));
+        binding.RecyclerColor.setLayoutManager(new LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false));
     }
 
     private void initSize() {
         binding.RecyclerSize.setAdapter(new SizeAdapter(object.getSize()));
-        binding.RecyclerSize.setLayoutManager(new LinearLayoutManager(this,LinearLayoutManager.HORIZONTAL,true));
+        binding.RecyclerSize.setLayoutManager(new LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, true));
     }
 
     private void initPicList() {
         ArrayList<String> picList = new ArrayList<>(object.getPicUrl());
         Glide.with(this)
                 .load(picList.get(0)).into(binding.pic);
-        binding.picList.setAdapter(new PicListAdapter(picList,binding.pic));
-        binding.picList.setLayoutManager(new LinearLayoutManager(this,LinearLayoutManager.HORIZONTAL,false));
+        binding.picList.setAdapter(new PicListAdapter(picList, binding.pic));
+        binding.picList.setLayoutManager(new LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false));
     }
 
     private void getBundles() {
-        String userId = "user_001";
+        // Lấy userId từ session thay vì hardcode
+        SessionManager sessionManager = new SessionManager(this);
+        User currentUser = sessionManager.getUserFromSession();
+        String userId = (currentUser != null) ? currentUser.getUserId() : null;
+
         object = (ItemsModel) getIntent().getSerializableExtra("object");
 
         binding.titleItemTxt.setText(object.getTitle());
@@ -86,8 +93,12 @@ public class DetailActivity extends AppCompatActivity {
                     object.getPrice(),
                     numberOrder,
                     selectedSize,
-                    selectedColor
-            );
+                    selectedColor);
+
+            if (userId == null) {
+                Toast.makeText(this, "Không xác định được user!", Toast.LENGTH_SHORT).show();
+                return;
+            }
 
             // Gọi hàm addToCart
             repository.addToCart(userId, cartItem)
@@ -95,7 +106,8 @@ public class DetailActivity extends AppCompatActivity {
                         Toast.makeText(DetailActivity.this, "Đã thêm vào giỏ hàng", Toast.LENGTH_SHORT).show();
                     })
                     .addOnFailureListener(e -> {
-                        Toast.makeText(DetailActivity.this, "Lỗi khi thêm giỏ hàng: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+                        Toast.makeText(DetailActivity.this, "Lỗi khi thêm giỏ hàng: " + e.getMessage(),
+                                Toast.LENGTH_SHORT).show();
                     });
         });
 
