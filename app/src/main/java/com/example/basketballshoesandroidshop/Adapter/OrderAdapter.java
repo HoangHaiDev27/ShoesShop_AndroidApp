@@ -22,6 +22,7 @@ import com.example.basketballshoesandroidshop.Activity.RatingDialogFragment;
 import com.example.basketballshoesandroidshop.Domain.OrderItemModel;
 import com.example.basketballshoesandroidshop.Domain.OrderModel;
 import com.example.basketballshoesandroidshop.R;
+import com.example.basketballshoesandroidshop.Utils.SessionManager;
 
 import java.text.NumberFormat;
 import java.util.List;
@@ -99,8 +100,9 @@ public class OrderAdapter extends RecyclerView.Adapter<OrderAdapter.OrderViewHol
         holder.itemView.setOnClickListener(v -> {
             // Lấy orderId của đơn hàng được click
             String orderId = order.getOrderId();
+            SessionManager sessionManager = new SessionManager(context);
             // Lấy userId (tạm thời hardcode, bạn nên truyền userId thực tế vào adapter)
-            String userId = "user_001";
+            String userId = sessionManager.getCurrentUserId();
 
             // Tạo Intent để mở OrderDetailActivity
             Intent intent = new Intent(context, OrderDetailActivity.class);
