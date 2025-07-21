@@ -15,6 +15,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import androidx.viewpager2.widget.CompositePageTransformer;
 import androidx.viewpager2.widget.MarginPageTransformer;
 
+import com.bumptech.glide.Glide;
 import com.example.basketballshoesandroidshop.Adapter.CategoryAdapter;
 import com.example.basketballshoesandroidshop.Adapter.PopularAdapter;
 import com.example.basketballshoesandroidshop.Adapter.SliderAdapter;
@@ -39,6 +40,7 @@ public class MainActivity extends AppCompatActivity {
     private SessionManager sessionManager;
     private TextView tvWelcomeBack, tvUserName;
     private LinearLayout llUserProfile;
+    private ImageView ivMainUserAvatar;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -93,7 +95,7 @@ public class MainActivity extends AppCompatActivity {
         // Find TextViews for user info
         tvWelcomeBack = findViewById(R.id.textView);
         tvUserName = findViewById(R.id.textView2);
-
+        ivMainUserAvatar = findViewById(R.id.imageView2);
         // Find the LinearLayout containing user profile
         llUserProfile = findViewById(R.id.llUserProfile); // You'll need to add this ID to layout
 
@@ -106,12 +108,24 @@ public class MainActivity extends AppCompatActivity {
         if (currentUser != null) {
             tvWelcomeBack.setText("Welcome back");
             tvUserName.setText(currentUser.getName());
+            loadMainUserAvatar(currentUser.getAvatar());
         } else {
             // If no user found, redirect to login
             goToLogin();
         }
     }
-
+    private void loadMainUserAvatar(String avatarUrl) {
+        if (avatarUrl != null && !avatarUrl.isEmpty()) {
+            Glide.with(this)
+                    .load(avatarUrl)
+                    .placeholder(R.drawable.image1)
+                    .error(R.drawable.image1)
+                    .circleCrop() // Làm tròn avatar
+                    .into(ivMainUserAvatar);
+        } else {
+            ivMainUserAvatar.setImageResource(R.drawable.image1); // Default avatar
+        }
+    }
     private void setupProfileClick() {
         // Set click listener for user profile area
         View profileArea = findViewById(R.id.llUserProfile);

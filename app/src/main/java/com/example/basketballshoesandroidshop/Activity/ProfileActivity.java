@@ -14,6 +14,7 @@ import androidx.annotation.NonNull;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 
+import com.bumptech.glide.Glide;
 import com.example.basketballshoesandroidshop.Domain.User;
 import com.example.basketballshoesandroidshop.R;
 import com.example.basketballshoesandroidshop.Utils.SessionManager;
@@ -30,7 +31,7 @@ public class ProfileActivity extends AppCompatActivity {
     private DatabaseReference databaseReference;
     private SessionManager sessionManager;
     private String currentUserId;
-
+    private ImageView ivUserAvatar;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -50,6 +51,7 @@ public class ProfileActivity extends AppCompatActivity {
 
         // Ánh xạ views từ layout
         tvUsername = findViewById(R.id.tvUsername);
+        ivUserAvatar = findViewById(R.id.ivUserAvatar);
         btnMenu = findViewById(R.id.btnMenu);
         ImageView btnBack = findViewById(R.id.btnBack);
         // Lấy tham chiếu đến Firebase Database
@@ -204,10 +206,12 @@ public class ProfileActivity extends AppCompatActivity {
                 if (snapshot.exists()) {
                     // Lấy giá trị của trường "name"
                     String username = snapshot.child("name").getValue(String.class);
+                    String avatar = snapshot.child("avatar").getValue(String.class);
                     if (username != null) {
                         // Cập nhật TextView
                         tvUsername.setText(username);
                     }
+                    loadUserAvatar(avatar);
                 }
             }
 
@@ -217,6 +221,18 @@ public class ProfileActivity extends AppCompatActivity {
                 Toast.makeText(ProfileActivity.this, "Lỗi khi tải tên người dùng.", Toast.LENGTH_SHORT).show();
             }
         });
+    }
+    private void loadUserAvatar(String avatarUrl) {
+        if (avatarUrl != null && !avatarUrl.isEmpty()) {
+            Glide.with(this)
+                    .load(avatarUrl)
+                    .placeholder(R.drawable.image1)
+                    .error(R.drawable.image1)
+                    .circleCrop() // Làm tròn avatar
+                    .into(ivUserAvatar);
+        } else {
+            ivUserAvatar.setImageResource(R.drawable.image1); // Default avatar
+        }
     }
 
     @Override

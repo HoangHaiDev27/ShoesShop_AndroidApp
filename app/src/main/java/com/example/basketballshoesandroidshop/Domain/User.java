@@ -8,11 +8,21 @@ public class User {
     private String phone;
     private String address;
     private String createdAt;
-
+    private String avatar;
     // Constructor rỗng (bắt buộc cho Firebase)
     public User() {}
 
     // Constructor đầy đủ
+    public User(String userId, String name, String email, String password, String phone, String address, String createdAt, String avatar) {
+        this.userId = userId;
+        this.name = name;
+        this.email = email;
+        this.password = password;
+        this.phone = phone;
+        this.address = address;
+        this.createdAt = createdAt;
+        this.avatar = avatar;
+    }
     public User(String userId, String name, String email, String password, String phone, String address, String createdAt) {
         this.userId = userId;
         this.name = name;
@@ -21,6 +31,7 @@ public class User {
         this.phone = phone;
         this.address = address;
         this.createdAt = createdAt;
+
     }
 
     // Getters và Setters
@@ -44,4 +55,6 @@ public class User {
 
     public String getCreatedAt() { return createdAt; }
     public void setCreatedAt(String createdAt) { this.createdAt = createdAt; }
+    public String getAvatar() { return avatar; }
+    public void setAvatar(String avatar) { this.avatar = avatar; }
 }
