@@ -1,8 +1,6 @@
-// MessageAdapter.java
 package com.example.basketballshoesandroidshop.Adapter;
 
 import android.content.Context;
-import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -10,7 +8,6 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
-import androidx.core.content.ContextCompat;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.basketballshoesandroidshop.Domain.ChatMessage;
@@ -22,60 +19,49 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MessageV
 
     private List<ChatMessage> messageList;
     private Context context;
+    private LayoutInflater inflater;
 
     public MessageAdapter(List<ChatMessage> messageList, Context context) {
         this.messageList = messageList;
         this.context = context;
+        this.inflater = LayoutInflater.from(context);
     }
 
     @NonNull
     @Override
     public MessageViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-        // Tạo layout programmatically thay vì dùng XML
-        LinearLayout itemView = new LinearLayout(context);
-        itemView.setLayoutParams(new ViewGroup.LayoutParams(
-                ViewGroup.LayoutParams.MATCH_PARENT,
-                ViewGroup.LayoutParams.WRAP_CONTENT));
-        itemView.setPadding(16, 8, 16, 8);
-        itemView.setOrientation(LinearLayout.HORIZONTAL);
-
-        TextView messageText = new TextView(context);
-        messageText.setId(View.generateViewId());
-        messageText.setPadding(20, 15, 20, 15);
-        messageText.setTextSize(16);
-
-        LinearLayout.LayoutParams textParams = new LinearLayout.LayoutParams(
-                ViewGroup.LayoutParams.WRAP_CONTENT,
-                ViewGroup.LayoutParams.WRAP_CONTENT);
-
-        itemView.addView(messageText, textParams);
-
-        return new MessageViewHolder(itemView, messageText);
+        View view = inflater.inflate(R.layout.item_message, parent, false);
+        return new MessageViewHolder(view);
     }
 
     @Override
     public void onBindViewHolder(@NonNull MessageViewHolder holder, int position) {
         ChatMessage message = messageList.get(position);
 
-        holder.messageText.setText(message.getMessage());
+        // Reset visibility cho tất cả layouts
+        holder.userMessageLayout.setVisibility(View.GONE);
+        holder.botMessageLayout.setVisibility(View.GONE);
+        holder.systemMessageLayout.setVisibility(View.GONE);
 
-        LinearLayout.LayoutParams params = (LinearLayout.LayoutParams) holder.messageText.getLayoutParams();
+        // Hiển thị layout phù hợp dựa trên loại tin nhắn
+        switch (message.getMessageType()) {
+            case USER:
+                holder.userMessageLayout.setVisibility(View.VISIBLE);
+                holder.userMessageText.setText(message.getMessage());
+                holder.userMessageTime.setText(message.getFormattedTime());
+                break;
 
-        if (message.isFromUser()) {
-            // User message - right side, blue
-            params.gravity = Gravity.END;
-            holder.messageText.setBackgroundColor(ContextCompat.getColor(context, android.R.color.holo_blue_light));
-            holder.messageText.setTextColor(ContextCompat.getColor(context, android.R.color.white));
-            params.setMargins(100, 5, 10, 5);
-        } else {
-            // Bot message - left side, gray
-            params.gravity = Gravity.START;
-            holder.messageText.setBackgroundColor(ContextCompat.getColor(context, android.R.color.darker_gray));
-            holder.messageText.setTextColor(ContextCompat.getColor(context, android.R.color.white));
-            params.setMargins(10, 5, 100, 5);
+            case BOT:
+                holder.botMessageLayout.setVisibility(View.VISIBLE);
+                holder.botMessageText.setText(message.getMessage());
+                holder.botMessageTime.setText(message.getFormattedTime());
+                break;
+
+            case SYSTEM:
+                holder.systemMessageLayout.setVisibility(View.VISIBLE);
+                holder.systemMessageText.setText(message.getMessage());
+                break;
         }
-
-        holder.messageText.setLayoutParams(params);
     }
 
     @Override
@@ -83,12 +69,38 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MessageV
         return messageList.size();
     }
 
-    static class MessageViewHolder extends RecyclerView.ViewHolder {
-        TextView messageText;
+    public static class MessageViewHolder extends RecyclerView.ViewHolder {
 
-        public MessageViewHolder(@NonNull View itemView, TextView messageText) {
+        // User message views
+        LinearLayout userMessageLayout;
+        TextView userMessageText;
+        TextView userMessageTime;
+
+        // Bot message views
+        LinearLayout botMessageLayout;
+        TextView botMessageText;
+        TextView botMessageTime;
+
+        // System message views
+        LinearLayout systemMessageLayout;
+        TextView systemMessageText;
+
+        public MessageViewHolder(@NonNull View itemView) {
             super(itemView);
-            this.messageText = messageText;
+
+            // User message views
+            userMessageLayout = itemView.findViewById(R.id.userMessageLayout);
+            userMessageText = itemView.findViewById(R.id.userMessageText);
+            userMessageTime = itemView.findViewById(R.id.userMessageTime);
+
+            // Bot message views
+            botMessageLayout = itemView.findViewById(R.id.botMessageLayout);
+            botMessageText = itemView.findViewById(R.id.botMessageText);
+            botMessageTime = itemView.findViewById(R.id.botMessageTime);
+
+            // System message views
+            systemMessageLayout = itemView.findViewById(R.id.systemMessageLayout);
+            systemMessageText = itemView.findViewById(R.id.systemMessageText);
         }
     }
 }
