@@ -39,6 +39,7 @@ public class MainActivity extends AppCompatActivity {
     private SessionManager sessionManager;
     private TextView tvWelcomeBack, tvUserName;
     private LinearLayout llUserProfile;
+    String userId;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -50,6 +51,7 @@ public class MainActivity extends AppCompatActivity {
 
         // Initialize session manager
         sessionManager = new SessionManager(this);
+        userId = sessionManager.getCurrentUserId();
 
         // Check if user is logged in
         if (!sessionManager.isLoggedIn()) {
@@ -180,7 +182,7 @@ public class MainActivity extends AppCompatActivity {
                 binding.popularView.setLayoutManager(
                         new LinearLayoutManager(MainActivity.this,LinearLayoutManager.HORIZONTAL,false)
                 );
-                popularAdapter = new PopularAdapter(itemsModels);
+                popularAdapter = new PopularAdapter(itemsModels, userId);
                 binding.popularView.setAdapter(popularAdapter);
                 binding.popularView.setNestedScrollingEnabled(true);
             }
