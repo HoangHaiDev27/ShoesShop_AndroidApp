@@ -13,6 +13,7 @@ import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.content.ContextCompat;
 import androidx.fragment.app.FragmentManager;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -70,6 +71,43 @@ public class OrderAdapter extends RecyclerView.Adapter<OrderAdapter.OrderViewHol
 
         NumberFormat currencyFormat = NumberFormat.getCurrencyInstance(new Locale("vi", "VN"));
         holder.textViewTotal.setText("Tổng số tiền: " + currencyFormat.format(order.getTotalPrice()));
+
+        // ✅ BẮT ĐẦU PHẦN CODE XỬ LÝ STATUS
+        String status = order.getOrderStatus();
+        holder.textViewOrderStatus.setText(status); // Cập nhật text
+
+        int statusColor;
+
+        switch (status) {
+            case "Đã giao":
+                holder.textViewOrderStatus.setText("Hoàn thành"); // Có thể đổi chữ nếu muốn
+                statusColor = ContextCompat.getColor(context, R.color.status_green_text);
+                holder.buttonRate.setVisibility(View.VISIBLE);
+                break;
+            case "Chờ xác nhận":
+                statusColor = ContextCompat.getColor(context, R.color.status_blue_text);
+                holder.buttonRate.setVisibility(View.GONE);
+                break;
+            case "Chờ lấy hàng":
+            case "Chờ giao hàng":
+                statusColor = ContextCompat.getColor(context, R.color.primary_orange);
+                holder.buttonRate.setVisibility(View.GONE);
+                break;
+            case "Đã hủy":
+            case "Trả hàng":
+                statusColor = ContextCompat.getColor(context, R.color.status_red_text);
+                holder.buttonRate.setVisibility(View.GONE);
+                break;
+            default:
+                statusColor = ContextCompat.getColor(context, android.R.color.darker_gray);
+                holder.buttonRate.setVisibility(View.GONE);
+                break;
+        }
+
+        // Cập nhật màu chữ cho status
+        holder.textViewOrderStatus.setTextColor(statusColor);
+
+        // ✅ KẾT THÚC PHẦN CODE XỬ LÝ STATUS
 
         // Xóa các view item cũ trước khi thêm mới
         holder.layoutOrderItems.removeAllViews();
