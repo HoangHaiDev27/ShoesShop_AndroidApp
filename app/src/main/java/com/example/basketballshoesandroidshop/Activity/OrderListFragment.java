@@ -31,6 +31,7 @@ import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -161,7 +162,10 @@ public class OrderListFragment extends Fragment {
 
                                 // 4. Kiểm tra xem đã xử lý xong tất cả các đơn hàng chưa
                                 if (ordersProcessed.incrementAndGet() == totalOrders) {
-                                    // Chỉ cập nhật adapter và UI sau khi đã lấy đủ dữ liệu cho TẤT CẢ đơn hàng
+                                    Collections.sort(orderList, (o1, o2) -> {
+                                       
+                                        return o2.getOrderDate().compareTo(o1.getOrderDate());
+                                    });
                                     progressBar.setVisibility(View.GONE);
                                     adapter.notifyDataSetChanged();
                                     if(orderList.isEmpty()){
