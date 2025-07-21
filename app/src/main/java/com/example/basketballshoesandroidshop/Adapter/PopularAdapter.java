@@ -30,11 +30,12 @@ public class PopularAdapter extends RecyclerView.Adapter<PopularAdapter.PopularV
     private ArrayList<ItemsModel> items;
     private Context context;
     private WishlistViewModel wishlistViewModel;
-    private String currentUserId = "user_001"; // Tạm thời hardcode
+    private String currentUserId;
     private WishlistCache wishlistCache;
 
-    public PopularAdapter(ArrayList<ItemsModel> items) {
+    public PopularAdapter(ArrayList<ItemsModel> items, String userId) {
         this.items = items;
+        this.currentUserId = userId;
         this.wishlistViewModel = new WishlistViewModel();
         this.wishlistCache = WishlistCache.getInstance();
     }
