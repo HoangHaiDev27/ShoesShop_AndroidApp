@@ -157,4 +157,26 @@ public class CartAcitivity extends AppCompatActivity {
         });
     }
 
+    private void checkRebuyMode() {
+        boolean fromRebuy = getIntent().getBooleanExtra("FROM_REBUY", false);
+
+        if (fromRebuy) {
+            String rebuyOrderId = getIntent().getStringExtra("REBUY_ORDER_ID");
+            int itemsCount = getIntent().getIntExtra("REBUY_ITEMS_COUNT", 0);
+
+            // Show rebuy notification
+            showRebuyNotification(rebuyOrderId, itemsCount);
+        }
+    }
+
+    private void showRebuyNotification(String orderId, int itemsCount) {
+        // Update toolbar title nếu có
+        if (getSupportActionBar() != null) {
+            getSupportActionBar().setTitle("🔄 Giỏ hàng (Mua lại #" + orderId + ")");
+        }
+
+        // Optional: Show additional info
+        // Toast.makeText(this, "📦 Đơn hàng mua lại từ #" + orderId, Toast.LENGTH_SHORT).show();
+    }
+
 }

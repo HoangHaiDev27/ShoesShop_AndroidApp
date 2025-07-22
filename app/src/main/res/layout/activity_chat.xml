@@ -1,0 +1,157 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/white"
+    tools:context=".Activity.ChatActivity">
+
+    <!-- Header với thông tin bot -->
+    <LinearLayout
+        android:id="@+id/headerLayout"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="@color/primary_color"
+        android:orientation="horizontal"
+        android:padding="16dp"
+        android:gravity="center_vertical"
+        app:layout_constraintTop_toTopOf="parent">
+
+        <!-- Back button -->
+        <ImageView
+            android:id="@+id/backButton"
+            android:layout_width="24dp"
+            android:layout_height="24dp"
+            android:src="@drawable/arrow_left"
+            android:contentDescription="Back"
+            app:tint="@color/white" />
+
+        <!-- Bot avatar -->
+        <ImageView
+            android:id="@+id/botAvatar"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:layout_marginStart="12dp"
+            android:background="@drawable/circle_white_bg"
+            android:padding="8dp"
+            android:src="@drawable/ic_chat"
+            android:contentDescription="Bot avatar"
+            app:tint="@color/primary_color" />
+
+        <!-- Bot info -->
+        <LinearLayout
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:layout_marginStart="12dp"
+            android:orientation="vertical">
+
+            <TextView
+                android:id="@+id/botName"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="🤖 Basketball Assistant"
+                android:textColor="@color/white"
+                android:textSize="16sp"
+                android:textStyle="bold" />
+
+            <TextView
+                android:id="@+id/botStatus"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="✅ Online • Trả lời ngay lập tức"
+                android:textColor="@color/white"
+                android:textSize="12sp"
+                android:alpha="0.9" />
+
+        </LinearLayout>
+
+    </LinearLayout>
+
+    <!-- Messages RecyclerView -->
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/messagesRecyclerView"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:padding="8dp"
+        android:clipToPadding="false"
+        android:background="@color/chat_background"
+        app:layout_constraintTop_toBottomOf="@id/headerLayout"
+        app:layout_constraintBottom_toTopOf="@id/inputLayout"
+        tools:listitem="@layout/item_message" />
+
+    <!-- Typing indicator (hidden by default) -->
+    <LinearLayout
+        android:id="@+id/typingIndicator"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="16dp"
+        android:layout_marginBottom="8dp"
+        android:background="@drawable/message_bubble_bot"
+        android:padding="12dp"
+        android:orientation="horizontal"
+        android:gravity="center_vertical"
+        android:visibility="gone"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintBottom_toTopOf="@id/inputLayout">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Basketball Assistant đang soạn tin"
+            android:textSize="14sp"
+            android:textColor="@color/gray_dark"
+            android:fontFamily="sans-serif-medium" />
+
+        <ProgressBar
+            android:layout_width="16dp"
+            android:layout_height="16dp"
+            android:layout_marginStart="8dp"
+            style="@style/Widget.AppCompat.ProgressBar" />
+
+    </LinearLayout>
+
+    <!-- Input layout -->
+    <LinearLayout
+        android:id="@+id/inputLayout"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:padding="12dp"
+        android:background="@color/white"
+        android:elevation="8dp"
+        android:gravity="center_vertical"
+        app:layout_constraintBottom_toBottomOf="parent">
+
+        <!-- Message input -->
+        <EditText
+            android:id="@+id/messageInput"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:minHeight="48dp"
+            android:layout_marginEnd="8dp"
+            android:background="@drawable/input_background"
+            android:hint="Nhập tin nhắn..."
+            android:padding="12dp"
+            android:textSize="16sp"
+            android:textColor="@color/black"
+            android:textColorHint="@color/gray"
+            android:inputType="textCapSentences|textMultiLine"
+            android:maxLines="4" />
+
+        <!-- Send button -->
+        <ImageView
+            android:id="@+id/sendButton"
+            android:layout_width="48dp"
+            android:layout_height="48dp"
+            android:background="@drawable/send_button_background"
+            android:src="@drawable/ic_send"
+            android:padding="12dp"
+            android:contentDescription="Send message"
+            app:tint="@color/white" />
+
+    </LinearLayout>
+
+</androidx.constraintlayout.widget.ConstraintLayout>

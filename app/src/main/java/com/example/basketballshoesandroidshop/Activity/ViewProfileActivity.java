@@ -9,6 +9,7 @@ import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 
+import com.bumptech.glide.Glide;
 import com.example.basketballshoesandroidshop.Domain.User;
 import com.example.basketballshoesandroidshop.R;
 import com.example.basketballshoesandroidshop.Utils.SessionManager;
@@ -24,7 +25,7 @@ public class ViewProfileActivity extends AppCompatActivity {
     private ImageView btnBack;
     private SessionManager sessionManager;
     private DatabaseReference databaseReference;
-
+    private ImageView ivProfileAvatar;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -50,6 +51,7 @@ public class ViewProfileActivity extends AppCompatActivity {
         tvEmail = findViewById(R.id.tvEmail);
         tvPhone = findViewById(R.id.tvPhone);
         tvAddress = findViewById(R.id.tvAddress);
+        ivProfileAvatar = findViewById(R.id.ivProfileAvatar);
         tvCreatedAt = findViewById(R.id.tvCreatedAt);
         btnBack = findViewById(R.id.btnBack);
     }
@@ -92,8 +94,20 @@ public class ViewProfileActivity extends AppCompatActivity {
         tvPhone.setText(user.getPhone() != null ? user.getPhone() : "N/A");
         tvAddress.setText(user.getAddress() != null ? user.getAddress() : "N/A");
         tvCreatedAt.setText(user.getCreatedAt() != null ? formatDate(user.getCreatedAt()) : "N/A");
+        loadUserAvatar(user.getAvatar());
     }
-
+    private void loadUserAvatar(String avatarUrl) {
+        if (avatarUrl != null && !avatarUrl.isEmpty()) {
+            Glide.with(this)
+                    .load(avatarUrl)
+                    .placeholder(R.drawable.image1)
+                    .error(R.drawable.image1)
+                    .circleCrop() // Làm tròn avatar
+                    .into(ivProfileAvatar);
+        } else {
+            ivProfileAvatar.setImageResource(R.drawable.image1); // Default avatar
+        }
+    }
     private String formatDate(String dateString) {
         try {
             // Convert ISO date to readable format

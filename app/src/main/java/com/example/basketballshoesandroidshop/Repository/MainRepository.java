@@ -12,16 +12,21 @@ import com.example.basketballshoesandroidshop.Domain.CartItemModel;
 import com.example.basketballshoesandroidshop.Domain.CategoryModel;
 import com.example.basketballshoesandroidshop.Domain.ItemsModel;
 import com.example.basketballshoesandroidshop.Domain.WishlistModel;
+import com.example.basketballshoesandroidshop.Domain.OrderModel;
+import com.example.basketballshoesandroidshop.Domain.OrderItemModel;
 import com.google.android.gms.tasks.TaskCompletionSource;
+import com.google.android.gms.tasks.Tasks;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.Query;
 import com.google.firebase.database.ValueEventListener;
 import com.google.android.gms.tasks.Task;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicInteger;
 
 public class MainRepository {
     private final FirebaseDatabase firebaseDatabase = FirebaseDatabase.getInstance();
@@ -438,6 +443,171 @@ public class MainRepository {
                 .child(userId)
                 .child(itemId)
                 .removeValue();
+    }
+
+    /**
+     * Lấy danh sách đơn hàng theo trạng thái và userId
+     */
+    public LiveData<ArrayList<OrderModel>> getOrdersByStatus(String userId, String status) {
+        MutableLiveData<ArrayList<OrderModel>> listData = new MutableLiveData<>();
+
+        Query query = databaseReference.child("Orders").child(userId)
+                .orderByChild("orderStatus")
+                .equalTo(status);
+
+        query.addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                ArrayList<OrderModel> orderList = new ArrayList<>();
+
+                if (!dataSnapshot.exists()) {
+                    listData.setValue(orderList);
+                    return;
+                }
+
+                final long totalOrders = dataSnapshot.getChildrenCount();
+                final AtomicInteger ordersProcessed = new AtomicInteger(0);
+
+                for (DataSnapshot orderSnapshot : dataSnapshot.getChildren()) {
+                    OrderModel order = orderSnapshot.getValue(OrderModel.class);
+                    String orderId = orderSnapshot.getKey();
+
+                    if (order != null) {
+                        order.setOrderId(orderId);
+
+                        // Lấy OrderItems cho đơn hàng này
+                        DatabaseReference itemsRef = databaseReference.child("OrderItem").child(orderId);
+                        itemsRef.addListenerForSingleValueEvent(new ValueEventListener() {
+                            @Override
+                            public void onDataChange(@NonNull DataSnapshot itemsSnapshot) {
+                                List<OrderItemModel> items = new ArrayList<>();
+                                for (DataSnapshot itemData : itemsSnapshot.getChildren()) {
+                                    OrderItemModel item = itemData.getValue(OrderItemModel.class);
+                                    if (item != null) {
+                                        items.add(item);
+                                    }
+                                }
+                                order.setItems(items);
+                                orderList.add(order);
+
+                                if (ordersProcessed.incrementAndGet() == totalOrders) {
+                                    listData.setValue(orderList);
+                                }
+                            }
+
+                            @Override
+                            public void onCancelled(@NonNull DatabaseError error) {
+                                if (ordersProcessed.incrementAndGet() == totalOrders) {
+                                    listData.setValue(orderList);
+                                }
+                            }
+                        });
+                    }
+                }
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {
+                listData.setValue(new ArrayList<>());
+            }
+        });
+
+        return listData;
+    }
+
+    /**
+     * Lấy danh sách đơn hàng "Đã giao" để hiển thị button mua lại
+     */
+    public LiveData<ArrayList<OrderModel>> getDeliveredOrders(String userId) {
+        return getOrdersByStatus(userId, "Đã giao");
+    }
+
+    /**
+     * Lấy chi tiết OrderItems của một đơn hàng
+     */
+    public LiveData<ArrayList<OrderItemModel>> getOrderItems(String orderId) {
+        MutableLiveData<ArrayList<OrderItemModel>> listData = new MutableLiveData<>();
+
+        DatabaseReference itemsRef = databaseReference.child("OrderItem").child(orderId);
+        itemsRef.addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
+                ArrayList<OrderItemModel> items = new ArrayList<>();
+                for (DataSnapshot itemSnapshot : snapshot.getChildren()) {
+                    OrderItemModel item = itemSnapshot.getValue(OrderItemModel.class);
+                    if (item != null) {
+                        items.add(item);
+                    }
+                }
+                listData.setValue(items);
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {
+                listData.setValue(new ArrayList<>());
+            }
+        });
+
+        return listData;
+    }
+
+    /**
+     * Thêm nhiều OrderItems vào giỏ hàng (cho tính năng mua lại)
+     */
+    public Task<Void> addOrderItemsToCart(String userId, List<OrderItemModel> orderItems) {
+        TaskCompletionSource<Void> taskCompletionSource = new TaskCompletionSource<>();
+
+        if (orderItems == null || orderItems.isEmpty()) {
+            taskCompletionSource.setResult(null);
+            return taskCompletionSource.getTask();
+        }
+
+        List<Task<Void>> tasks = new ArrayList<>();
+
+        for (OrderItemModel orderItem : orderItems) {
+            // Chuyển đổi OrderItemModel thành CartItemModel
+            CartItemModel cartItem = new CartItemModel(
+                    orderItem.getItemId(),
+                    orderItem.getPrice(),
+                    orderItem.getQuantity(),
+                    orderItem.getSize(),
+                    "" // OrderItemModel không có color, để trống hoặc lấy từ database
+            );
+
+            // Thêm vào giỏ hàng
+            Task<Void> addTask = addToCart(userId, cartItem);
+            tasks.add(addTask);
+        }
+
+        // Đợi tất cả tasks hoàn thành
+        Tasks.whenAll(tasks)
+                .addOnSuccessListener(aVoid -> taskCompletionSource.setResult(null))
+                .addOnFailureListener(taskCompletionSource::setException);
+
+        return taskCompletionSource.getTask();
+    }
+
+    /**
+     * Kiểm tra trạng thái sản phẩm trước khi mua lại
+     */
+    public Task<Boolean> checkItemAvailability(String itemId) {
+        TaskCompletionSource<Boolean> taskCompletionSource = new TaskCompletionSource<>();
+
+        DatabaseReference itemRef = databaseReference.child("Items").child(itemId);
+        itemRef.addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
+                boolean isAvailable = snapshot.exists();
+                taskCompletionSource.setResult(isAvailable);
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {
+                taskCompletionSource.setResult(false);
+            }
+        });
+
+        return taskCompletionSource.getTask();
     }
 
 }

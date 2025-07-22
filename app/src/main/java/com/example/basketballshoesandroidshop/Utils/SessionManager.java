@@ -15,7 +15,7 @@ public class SessionManager {
     private static final String KEY_USER_PHONE = "userPhone";
     private static final String KEY_USER_ADDRESS = "userAddress";
     private static final String KEY_REMEMBER_ME = "rememberMe";
-
+    private static final String KEY_USER_AVATAR = "userAvatar";
     private SharedPreferences pref;
     private SharedPreferences.Editor editor;
     private Context context;
@@ -34,6 +34,7 @@ public class SessionManager {
         editor.putString(KEY_USER_EMAIL, user.getEmail());
         editor.putString(KEY_USER_PHONE, user.getPhone());
         editor.putString(KEY_USER_ADDRESS, user.getAddress());
+        editor.putString(KEY_USER_AVATAR, user.getAvatar());
         editor.putBoolean(KEY_REMEMBER_ME, rememberMe);
         editor.commit();
     }
@@ -57,6 +58,7 @@ public class SessionManager {
             user.setEmail(pref.getString(KEY_USER_EMAIL, ""));
             user.setPhone(pref.getString(KEY_USER_PHONE, ""));
             user.setAddress(pref.getString(KEY_USER_ADDRESS, ""));
+            user.setAvatar(pref.getString(KEY_USER_AVATAR, ""));
             return user;
         }
         return null;

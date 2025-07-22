@@ -1,6 +1,8 @@
 package com.example.basketballshoesandroidshop.Activity;
 
 import android.os.Bundle;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
@@ -11,6 +13,7 @@ import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 
+import com.bumptech.glide.Glide;
 import com.example.basketballshoesandroidshop.Domain.User;
 import com.example.basketballshoesandroidshop.R;
 import com.example.basketballshoesandroidshop.Utils.SessionManager;
@@ -26,7 +29,7 @@ import java.util.Map;
 
 public class EditProfileActivity extends AppCompatActivity {
 
-    private EditText etName, etPhone, etAddress;
+    private EditText etName, etPhone, etAddress, etAvatar;;
     private Button btnSave;
     private ImageView btnBack;
     private ProgressBar progressBar;
@@ -34,7 +37,7 @@ public class EditProfileActivity extends AppCompatActivity {
     private SessionManager sessionManager;
     private DatabaseReference databaseReference;
     private String currentUserId;
-
+    private ImageView ivAvatarPreview; // Thêm preview image
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -60,11 +63,34 @@ public class EditProfileActivity extends AppCompatActivity {
         etName = findViewById(R.id.etName);
         etPhone = findViewById(R.id.etPhone);
         etAddress = findViewById(R.id.etAddress);
+        etAvatar = findViewById(R.id.etAvatar); // Thêm dòng này
+        ivAvatarPreview = findViewById(R.id.ivAvatarPreview); // Thêm dòng này
         btnSave = findViewById(R.id.btnSave);
         btnBack = findViewById(R.id.btnBack);
         progressBar = findViewById(R.id.progressBar);
-    }
 
+        etAvatar.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void afterTextChanged(Editable s) {
+                loadAvatarPreview(s.toString().trim());
+            }
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {}
+        });
+    }
+    private void loadAvatarPreview(String avatarUrl) {
+        if (!avatarUrl.isEmpty()) {
+            Glide.with(this)
+                    .load(avatarUrl)
+                    .placeholder(R.drawable.ic_account_circle)
+                    .error(R.drawable.ic_account_circle)
+                    .into(ivAvatarPreview);
+        } else {
+            ivAvatarPreview.setImageResource(R.drawable.ic_account_circle);
+        }
+    }
     private void loadCurrentUserData() {
         if (currentUserId != null && !currentUserId.isEmpty()) {
             showLoading(true);
@@ -81,6 +107,8 @@ public class EditProfileActivity extends AppCompatActivity {
                             etName.setText(user.getName());
                             etPhone.setText(user.getPhone());
                             etAddress.setText(user.getAddress());
+                            etAvatar.setText(user.getAvatar() != null ? user.getAvatar() : ""); // Thêm dòng này
+                            loadAvatarPreview(user.getAvatar() != null ? user.getAvatar() : ""); // Thêm dòng này
                         }
                     }
                 }
@@ -98,6 +126,8 @@ public class EditProfileActivity extends AppCompatActivity {
                 etName.setText(user.getName());
                 etPhone.setText(user.getPhone());
                 etAddress.setText(user.getAddress());
+                etAvatar.setText(user.getAvatar() != null ? user.getAvatar() : "");
+                loadAvatarPreview(user.getAvatar() != null ? user.getAvatar() : "");
             }
         }
     }
@@ -106,7 +136,7 @@ public class EditProfileActivity extends AppCompatActivity {
         String name = etName.getText().toString().trim();
         String phone = etPhone.getText().toString().trim();
         String address = etAddress.getText().toString().trim();
-
+        String avatar = etAvatar.getText().toString().trim();
         // Validate input
         if (!validateInput(name, phone, address)) {
             return;
@@ -115,7 +145,7 @@ public class EditProfileActivity extends AppCompatActivity {
         showLoading(true);
 
         // Update Firebase
-        updateUserInFirebase(name, phone, address);
+        updateUserInFirebase(name, phone, address, avatar);
     }
 
     private boolean validateInput(String name, String phone, String address) {
@@ -145,7 +175,7 @@ public class EditProfileActivity extends AppCompatActivity {
         return isValid;
     }
 
-    private void updateUserInFirebase(String name, String phone, String address) {
+    private void updateUserInFirebase(String name, String phone, String address, String avatar) {
         if (currentUserId == null || currentUserId.isEmpty()) {
             showLoading(false);
             Toast.makeText(this, "Không tìm thấy ID người dùng", Toast.LENGTH_SHORT).show();
@@ -157,7 +187,7 @@ public class EditProfileActivity extends AppCompatActivity {
         updates.put("name", name);
         updates.put("phone", phone);
         updates.put("address", address);
-
+        updates.put("avatar", avatar);
         // Update in Firebase
         databaseReference.child(currentUserId).updateChildren(updates)
                 .addOnCompleteListener(task -> {
@@ -165,7 +195,7 @@ public class EditProfileActivity extends AppCompatActivity {
 
                     if (task.isSuccessful()) {
                         // Update session with new data
-                        updateSession(name, phone, address);
+                        updateSession(name, phone, address,avatar);
 
                         Toast.makeText(EditProfileActivity.this, "Cập nhật thông tin thành công!", Toast.LENGTH_SHORT).show();
                         finish(); // Return to previous screen
@@ -175,7 +205,7 @@ public class EditProfileActivity extends AppCompatActivity {
                 });
     }
 
-    private void updateSession(String name, String phone, String address) {
+    private void updateSession(String name, String phone, String address,String avatar) {
         // Get current user from session
         User currentUser = sessionManager.getUserFromSession();
         if (currentUser != null) {
@@ -183,7 +213,7 @@ public class EditProfileActivity extends AppCompatActivity {
             currentUser.setName(name);
             currentUser.setPhone(phone);
             currentUser.setAddress(address);
-
+            currentUser.setAvatar(avatar);
             // Save updated user back to session
             boolean rememberMe = sessionManager.isRememberMe();
             sessionManager.createLoginSession(currentUser, rememberMe);
